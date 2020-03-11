@@ -1,8 +1,10 @@
 package com.gladguys.polisscheduler.services;
 
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+@Service
 public class DadosAbertoService {
 
 	private final RestTemplate restTemplate;
