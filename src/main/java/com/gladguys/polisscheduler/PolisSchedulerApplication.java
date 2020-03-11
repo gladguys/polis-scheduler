@@ -9,11 +9,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.ClassPathResource;
 import com.google.auth.oauth2.GoogleCredentials;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 @SpringBootApplication
+@EnableScheduling
 public class PolisSchedulerApplication {
 
 	public static void main(String[] args) throws IOException {
