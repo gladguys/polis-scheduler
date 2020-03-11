@@ -11,16 +11,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 public class PoliticosService {
 
 	private final RestTemplate restTemplate;
+	private final FirestoreService firestoreService;
 
-	public PoliticosService(RestTemplateBuilder restTemplateBuilder) {
+	public PoliticosService(RestTemplateBuilder restTemplateBuilder, FirestoreService firestoreService) {
 		this.restTemplate = restTemplateBuilder.build();
+		this.firestoreService = firestoreService;
 	}
 
 	public void getPoliticos() {
@@ -32,7 +32,7 @@ public class PoliticosService {
 			PoliticoCompleto pCompleto =
 							this.restTemplate.getForObject(ps.getUri(), RetornoApiPoliticosCompleto.class).dados;
 			Politico politico = PoliticoBuilder.build(pCompleto);
-
+			firestoreService.addPolitico(politico);
 		});
 	}
 }

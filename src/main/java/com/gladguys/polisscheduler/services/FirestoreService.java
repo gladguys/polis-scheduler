@@ -1,9 +1,11 @@
 package com.gladguys.polisscheduler.services;
 
+import com.gladguys.polisscheduler.model.Politico;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
+import com.google.cloud.firestore.WriteResult;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -30,5 +32,9 @@ public class FirestoreService {
 		for (QueryDocumentSnapshot document : documents) {
 			System.out.println("User: " + document.getId());
 		}
+	}
+
+	public void addPolitico(Politico politico) {
+		ApiFuture<WriteResult> future = db.collection("politicos").document(politico.getId()).set(politico);
 	}
 }
