@@ -1,34 +1,25 @@
 package com.gladguys.polisscheduler.model;
 
-public class Politico {
-	private String id;
-	private String nomeCivil;
+public class UltimoStatusPolitico {
+
+	private String nome;
 	private String siglaPartido;
+	private String uriPartido;
 	private String siglaUf;
 	private String urlFoto;
 	private String email;
+	private String data;
 	private String nomeEleitoral;
 	private String status;
 	private String condicaoEleitoral;
-	private String cpf;
-	private String sexo;
-	private String dataNascimento;
-	private String escolaridade;
 
-	public String getId() {
-		return id;
+
+	public String getNome() {
+		return nome;
 	}
 
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	public String getNomeCivil() {
-		return nomeCivil;
-	}
-
-	public void setNomeCivil(String nomeCivil) {
-		this.nomeCivil = nomeCivil;
+	public void setNome(String nome) {
+		this.nome = nome;
 	}
 
 	public String getSiglaPartido() {
@@ -37,6 +28,14 @@ public class Politico {
 
 	public void setSiglaPartido(String siglaPartido) {
 		this.siglaPartido = siglaPartido;
+	}
+
+	public String getUriPartido() {
+		return uriPartido;
+	}
+
+	public void setUriPartido(String uriPartido) {
+		this.uriPartido = uriPartido;
 	}
 
 	public String getSiglaUf() {
@@ -63,6 +62,14 @@ public class Politico {
 		this.email = email;
 	}
 
+	public String getData() {
+		return data;
+	}
+
+	public void setData(String data) {
+		this.data = data;
+	}
+
 	public String getNomeEleitoral() {
 		return nomeEleitoral;
 	}
@@ -86,36 +93,5 @@ public class Politico {
 	public void setCondicaoEleitoral(String condicaoEleitoral) {
 		this.condicaoEleitoral = condicaoEleitoral;
 	}
-
-	public String getCpf() {
-		return cpf;
-	}
-
-	public void setCpf(String cpf) {
-		this.cpf = cpf;
-	}
-
-	public String getSexo() {
-		return sexo;
-	}
-
-	public void setSexo(String sexo) {
-		this.sexo = sexo;
-	}
-
-	public String getDataNascimento() {
-		return dataNascimento;
-	}
-
-	public void setDataNascimento(String dataNascimento) {
-		this.dataNascimento = dataNascimento;
-	}
-
-	public String getEscolaridade() {
-		return escolaridade;
-	}
-
-	public void setEscolaridade(String escolaridade) {
-		this.escolaridade = escolaridade;
-	}
 }
+

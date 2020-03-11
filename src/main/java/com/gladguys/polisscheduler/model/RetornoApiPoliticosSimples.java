@@ -2,7 +2,7 @@ package com.gladguys.polisscheduler.model;
 
 import java.util.List;
 
-public class RetornoApi {
+public class RetornoApiPoliticosSimples {
 
 	public List<PoliticoSimples> dados;
 }
