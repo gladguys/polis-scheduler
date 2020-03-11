@@ -29,8 +29,7 @@ public class PoliticosService {
 				this.restTemplate.getForObject(url, RetornoApiPoliticosSimples.class).dados;
 
 		politicos.forEach(ps -> {
-			PoliticoCompleto pCompleto =
-							this.restTemplate.getForObject(ps.getUri(), RetornoApiPoliticosCompleto.class).dados;
+			PoliticoCompleto pCompleto = this.restTemplate.getForObject(ps.getUri(), RetornoApiPoliticosCompleto.class).dados;
 			Politico politico = PoliticoBuilder.build(pCompleto);
 			firestoreService.addPolitico(politico);
 		});
