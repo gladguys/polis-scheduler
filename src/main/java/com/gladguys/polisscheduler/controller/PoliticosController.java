@@ -1,6 +1,7 @@
 package com.gladguys.polisscheduler.controller;
 
 import com.gladguys.polisscheduler.services.PoliticosService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,9 +19,11 @@ public class PoliticosController {
 
 	@GetMapping
 	public ResponseEntity<String> getPoliticos() {
-
-		politicosService.getPoliticos();
-
-		return null;
+		try {
+			politicosService.getPoliticos();
+			return ResponseEntity.ok("Politicos salvos com sucesso!");
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+		}
 	}
 }
