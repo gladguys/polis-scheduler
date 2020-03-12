@@ -15,6 +15,8 @@ import java.util.List;
 @Service
 public class PoliticosService {
 
+	private static final String URI_POLITICOS = "https://dadosabertos.camara.leg.br/api/v2/deputados" ;
+
 	private final RestTemplate restTemplate;
 	private final FirestoreService firestoreService;
 
@@ -23,15 +25,16 @@ public class PoliticosService {
 		this.firestoreService = firestoreService;
 	}
 
-	public void getPoliticos() {
-		String url = "https://dadosabertos.camara.leg.br/api/v2/deputados?ordem=ASC&ordenarPor=nome";
+	public void salvaPoliticos() {
+		String url = URI_POLITICOS + "?ordem=ASC&ordenarPor=nome";
 		List<PoliticoSimples> politicos =
 				this.restTemplate.getForObject(url, RetornoApiPoliticosSimples.class).dados;
+		politicos.forEach(this::salvaPolitico);
+	}
 
-		politicos.forEach(ps -> {
-			PoliticoCompleto pCompleto = this.restTemplate.getForObject(ps.getUri(), RetornoApiPoliticosCompleto.class).dados;
-			Politico politico = PoliticoBuilder.build(pCompleto);
-			firestoreService.addPolitico(politico);
-		});
+	private void salvaPolitico(PoliticoSimples ps) {
+		PoliticoCompleto pCompleto = this.restTemplate.getForObject(ps.getUri(), RetornoApiPoliticosCompleto.class).dados;
+		Politico politico = PoliticoBuilder.build(pCompleto);
+		firestoreService.addPolitico(politico);
 	}
 }
