@@ -20,7 +20,7 @@ public class PoliticosController {
 	@GetMapping
 	public ResponseEntity<String> getPoliticos() {
 		try {
-			politicosService.getPoliticos();
+			politicosService.salvaPoliticos();
 			return ResponseEntity.ok("Politicos salvos com sucesso!");
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
