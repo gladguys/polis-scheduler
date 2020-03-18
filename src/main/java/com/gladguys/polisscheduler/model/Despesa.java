@@ -5,6 +5,7 @@ import lombok.Data;
 @Data
 public class Despesa {
     private String ano;
+    private TipoAtividade tipoAtividade = TipoAtividade.DESPESA;
     private String cnpjCpfFornecedor;
     private String codDocumento;
     private String codLote;
