@@ -6,6 +6,9 @@ import lombok.Data;
 public class Despesa {
     private String ano;
     private TipoAtividade tipoAtividade = TipoAtividade.DESPESA;
+    private String nomePolitico;
+    private String idPolitico;
+    private String siglaPartido;
     private String cnpjCpfFornecedor;
     private String codDocumento;
     private String codLote;
