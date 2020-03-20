@@ -8,7 +8,6 @@ import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
 import com.google.cloud.firestore.WriteResult;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -41,15 +40,14 @@ public class FirestoreService {
 		ApiFuture<WriteResult> future = db.collection("politicos").document(politico.getId()).set(politico);
 	}
 
-	public List<String> getPoliticosIds() throws InterruptedException, ExecutionException {
-		List<String> politicosIds = new ArrayList<>();
+	public List<Politico> getPoliticosIds() throws InterruptedException, ExecutionException {
+		List<Politico> politicos = new ArrayList<>();
 		ApiFuture<QuerySnapshot> future = db.collection("politicos").get();
 		List<QueryDocumentSnapshot> documents = future.get().getDocuments();
 		for (DocumentSnapshot document : documents) {
-			politicosIds.add(document.getId());	
+			politicos.add(document.toObject(Politico.class));	
 		}
-		
-		return politicosIds;
+		return politicos;
 	}
 
 	public void salvarDespesas(List<Despesa> despesas, String politicoId) {
