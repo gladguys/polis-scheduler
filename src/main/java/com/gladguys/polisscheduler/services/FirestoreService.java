@@ -8,6 +8,8 @@ import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
 import com.google.cloud.firestore.WriteResult;
+
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -24,7 +26,6 @@ public class FirestoreService {
 		this.db = firestore;
 	}
 
-	// @Scheduled(cron = "0 32 23 * * ?")
 	// @Scheduled(fixedRate = 1000)
 	public void getUsers() throws IOException, ExecutionException, InterruptedException {
 

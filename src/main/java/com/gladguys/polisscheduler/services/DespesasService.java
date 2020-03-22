@@ -10,6 +10,7 @@ import com.gladguys.polisscheduler.model.RetornoDespesas;
 import com.gladguys.polisscheduler.utils.DataUtil;
 
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -26,6 +27,7 @@ public class DespesasService {
         this.firestoreService = firestoreService;
     }
 
+    @Scheduled(cron = "0 30 02 * * ?")
     public void salvarDespesasDoDia() throws InterruptedException, ExecutionException {
         List<Politico> politicos = firestoreService.getPoliticosIds();
         politicos.forEach(p -> {
