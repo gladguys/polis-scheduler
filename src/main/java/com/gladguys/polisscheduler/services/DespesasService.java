@@ -27,7 +27,7 @@ public class DespesasService {
         this.firestoreService = firestoreService;
     }
 
-    @Scheduled(cron = "0 30 02 * * ?")
+    @Scheduled(cron = "0 48 05 * * ?")
     public void salvarDespesasDoDia() throws InterruptedException, ExecutionException {
         List<Politico> politicos = firestoreService.getPoliticosIds();
         politicos.forEach(p -> {
