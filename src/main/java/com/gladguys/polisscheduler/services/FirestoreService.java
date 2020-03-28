@@ -1,6 +1,7 @@
 package com.gladguys.polisscheduler.services;
 
 import com.gladguys.polisscheduler.model.Despesa;
+import com.gladguys.polisscheduler.model.Partido;
 import com.gladguys.polisscheduler.model.Politico;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.DocumentSnapshot;
@@ -54,6 +55,12 @@ public class FirestoreService {
 	public void salvarDespesas(List<Despesa> despesas, String politicoId) {
 		despesas.forEach(d -> {
 			db.collection("atividades").document(politicoId).collection("despesasPolitico").add(d); 
+		});
+	}
+
+	public void salvarPartidos(List<Partido> partidos) {
+		partidos.forEach(p -> {
+			db.collection("partidos").document(p.getId()).set(p);
 		});
 	}
 }
