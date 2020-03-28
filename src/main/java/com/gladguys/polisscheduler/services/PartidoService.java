@@ -1,16 +1,9 @@
 package com.gladguys.polisscheduler.services;
 
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
-import com.gladguys.polisscheduler.model.Despesa;
 import com.gladguys.polisscheduler.model.Partido;
-import com.gladguys.polisscheduler.model.Politico;
-import com.gladguys.polisscheduler.model.RetornoApiPartido;
 import com.gladguys.polisscheduler.model.RetornoApiPartidos;
-import com.gladguys.polisscheduler.model.RetornoDespesas;
-import com.gladguys.polisscheduler.utils.DataUtil;
 
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
