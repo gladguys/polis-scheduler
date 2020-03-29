@@ -42,7 +42,7 @@ public class FirestoreService {
 		ApiFuture<WriteResult> future = db.collection("politicos").document(politico.getId()).set(politico);
 	}
 
-	public List<Politico> getPoliticosIds() throws InterruptedException, ExecutionException {
+	public List<Politico> getPoliticos() throws InterruptedException, ExecutionException {
 		List<Politico> politicos = new ArrayList<>();
 		ApiFuture<QuerySnapshot> future = db.collection("politicos").get();
 		List<QueryDocumentSnapshot> documents = future.get().getDocuments();

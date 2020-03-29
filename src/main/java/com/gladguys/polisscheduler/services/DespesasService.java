@@ -29,7 +29,7 @@ public class DespesasService {
 
     //@Scheduled(cron = "0 48 05 * * ?")
     public void salvarDespesasDoDia() throws InterruptedException, ExecutionException {
-        List<Politico> politicos = firestoreService.getPoliticosIds();
+        List<Politico> politicos = firestoreService.getPoliticos();
         politicos.forEach(p -> {
             int numeroMes = DataUtil.getNumeroMes();
             String urlParaDespesasPolitico = URI_POLITICOS + p.getId() + "/despesas?ano=2020&mes=" + numeroMes
@@ -43,6 +43,7 @@ public class DespesasService {
                 d.setIdPolitico(p.getId());
                 d.setNomePolitico(p.getNomeEleitoral());
                 d.setSiglaPartido(p.getSiglaPartido());
+                d.setFotoPolitico(p.getUrlFoto());
             });
 
             firestoreService.salvarDespesas(despesasDeHoje, p.getId());

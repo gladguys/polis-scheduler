@@ -6,6 +6,7 @@ import lombok.Data;
 public class Despesa {
     private String ano;
     private TipoAtividade tipoAtividade = TipoAtividade.DESPESA;
+    private String fotoPolitico;
     private String nomePolitico;
     private String idPolitico;
     private String siglaPartido;
