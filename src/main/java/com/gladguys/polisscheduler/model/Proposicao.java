@@ -15,9 +15,13 @@ public class Proposicao {
     private String descricaoTramitacao;
     private String descricaoSituacao;
     private String despacho;
-    private String nomePoliticoAutor;
+    private String nomePolitico;
     private String idPoliticoAutor;
     private String ementaDetalhada;
     private String keywords;
+    private String tipoAtividade = "PROPOSICAO";
+    private String siglaPartido;
+    private String fotoPolitico;
+
 
 }

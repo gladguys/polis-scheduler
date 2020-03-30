@@ -59,8 +59,11 @@ public class ProposicaoService {
                 if (politicosId.contains(politicoRetorno.getId())) {
 
                     Proposicao proposicao = proposicaoCompleto.build();
-                    proposicao.setNomePoliticoAutor(politicoRetorno.getUltimoStatus().getNomeEleitoral());
+                    proposicao.setNomePolitico(politicoRetorno.getUltimoStatus().getNomeEleitoral());
                     proposicao.setIdPoliticoAutor(politicoRetorno.getId());
+                    proposicao.setSiglaPartido(politicoRetorno.getUltimoStatus().getSiglaPartido());
+                    proposicao.setFotoPolitico(politicoRetorno.getUltimoStatus().getUrlFoto());
+                    
                     firestoreService.salvarProposicao(proposicao);
                 }
             }
