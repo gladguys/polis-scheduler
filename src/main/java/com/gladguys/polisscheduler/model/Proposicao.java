@@ -1,0 +1,23 @@
+package com.gladguys.polisscheduler.model;
+
+import lombok.Data;
+
+@Data
+public class Proposicao {
+
+    private String id;
+    private String descricaoTipo;
+    private String numero;
+    private String ementa;
+    private String dataApresentacao;
+    private String dataStatus;
+    private String sequencia;
+    private String descricaoTramitacao;
+    private String descricaoSituacao;
+    private String despacho;
+    private String nomePoliticoAutor;
+    private String idPoliticoAutor;
+    private String ementaDetalhada;
+    private String keywords;
+
+}

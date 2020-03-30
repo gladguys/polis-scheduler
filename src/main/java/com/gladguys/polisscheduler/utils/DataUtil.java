@@ -17,4 +17,8 @@ public class DataUtil {
             String dataHojeComoString = LocalDate.now().minusDays(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")).toString();
             return dataComoString.equals(dataHojeComoString);
     }
+
+    public static String getDataOntem() {
+        return LocalDate.now().minusDays(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")).toString();
+    }
 }
