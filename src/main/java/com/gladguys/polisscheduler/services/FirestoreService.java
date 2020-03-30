@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 @Service
 public class FirestoreService {
@@ -66,9 +67,21 @@ public class FirestoreService {
 	}
 
 	public void salvarProposicao(Proposicao proposicao) {
-		db.collection("atividades")
-			.document(proposicao.getIdPoliticoAutor())
-			.collection("proposicoesPolitico")
-				.add(proposicao);
+
+		db.collection("atividades").document(proposicao.getIdPoliticoAutor()).collection("proposicoesPolitico")
+				.document(proposicao.getId()).create(proposicao);
+	}
+
+	public void deleteAllProposicoes() {
+
+		try {
+			List<String> politicosId = getPoliticos().stream().map(p -> p.getId()).collect(Collectors.toList());
+			politicosId.forEach(p -> {
+				db.collection("atividades").document(p).collection("proposicoesPolitico").listDocuments().forEach(d -> d.delete());;
+			});
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+		}
+		
 	}
 }

@@ -21,9 +21,18 @@ public class ProposicaoController {
 	@GetMapping
 	public ResponseEntity<String> salvaProposicoes() {
 		try {
-			System.out.println("deded");
 			proposicaoService.salvarProposicoes();
-			return ResponseEntity.ok("Partidos salvos com sucesso!");
+			return ResponseEntity.ok("Proposicoes salvas com sucesso!");
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+		}
+	}
+
+	@GetMapping(value = "/deletaTodas")
+	public ResponseEntity<String> deletaProposicoes() {
+		try {
+			proposicaoService.deletaProposicoes();
+			return ResponseEntity.ok("Todas Proposicoes deletadas com sucesso!");
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
 		}

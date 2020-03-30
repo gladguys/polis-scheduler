@@ -68,4 +68,8 @@ public class ProposicaoService {
         });
     }
 
+    public void deletaProposicoes() {
+        firestoreService.deleteAllProposicoes();
+    }
+
 }
