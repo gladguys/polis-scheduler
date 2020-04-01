@@ -57,7 +57,6 @@ public class DespesasService {
                 d.setNomePolitico(p.getNomeEleitoral());
                 d.setSiglaPartido(p.getSiglaPartido());
                 d.setFotoPolitico(p.getUrlFoto());
-                System.out.println(d);
             });
 
             firestoreService.salvarDespesas(despesasDeHoje, p.getId());
