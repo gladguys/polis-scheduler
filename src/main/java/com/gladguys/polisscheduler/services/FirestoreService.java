@@ -77,11 +77,13 @@ public class FirestoreService {
 		try {
 			List<String> politicosId = getPoliticos().stream().map(p -> p.getId()).collect(Collectors.toList());
 			politicosId.forEach(p -> {
-				db.collection("atividades").document(p).collection("proposicoesPolitico").listDocuments().forEach(d -> d.delete());;
+				db.collection("atividades").document(p).collection("proposicoesPolitico").listDocuments().forEach(d -> d.delete());
+				db.collection("atividades").document(p).collection("despesasPolitico").listDocuments().forEach(d -> d.delete());
 			});
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
 		}
 		
 	}
+
 }
