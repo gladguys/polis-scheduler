@@ -27,7 +27,7 @@ public class DespesasService {
         this.firestoreService = firestoreService;
     }
 
-    //@Scheduled(cron = "0 48 05 * * ?")
+    // @Scheduled(cron = "0 48 05 * * ?")
     public void salvarDespesasDoDia() throws InterruptedException, ExecutionException {
         List<Politico> politicos = firestoreService.getPoliticos();
         politicos.forEach(p -> {
@@ -35,15 +35,29 @@ public class DespesasService {
             String urlParaDespesasPolitico = URI_POLITICOS + p.getId() + "/despesas?ano=2020&mes=" + numeroMes
                     + "&ordem=ASC&ordenarPor=ano";
 
+            String urlParaDespesasPoliticoMesPassado;
+            if (numeroMes == 1) {
+                urlParaDespesasPoliticoMesPassado = URI_POLITICOS + p.getId()
+                        + "/despesas?ano=2019&mes=12&ordem=ASC&ordenarPor=ano";
+            } else {
+                urlParaDespesasPoliticoMesPassado = URI_POLITICOS + p.getId() + "/despesas?ano=2020&mes="
+                        + (numeroMes - 1) + "&ordem=ASC&ordenarPor=ano";
+            }
+
             List<Despesa> despesasDeHoje = this.restTemplate
-                    .getForObject(urlParaDespesasPolitico, RetornoDespesas.class).getDados().stream()
-                    .filter(despesa -> DataUtil.ehHoje(despesa.getDataDocumento())).collect(Collectors.toList());
+                    .getForObject(urlParaDespesasPolitico, RetornoDespesas.class).getDados();
+
+            List<Despesa> despesasMesPassado = this.restTemplate
+                    .getForObject(urlParaDespesasPoliticoMesPassado, RetornoDespesas.class).getDados();
+
+            despesasDeHoje.addAll(despesasMesPassado);
 
             despesasDeHoje.forEach(d -> {
                 d.setIdPolitico(p.getId());
                 d.setNomePolitico(p.getNomeEleitoral());
                 d.setSiglaPartido(p.getSiglaPartido());
                 d.setFotoPolitico(p.getUrlFoto());
+                System.out.println(d);
             });
 
             firestoreService.salvarDespesas(despesasDeHoje, p.getId());

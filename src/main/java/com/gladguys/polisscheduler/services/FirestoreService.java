@@ -56,7 +56,9 @@ public class FirestoreService {
 
 	public void salvarDespesas(List<Despesa> despesas, String politicoId) {
 		despesas.forEach(d -> {
-			db.collection("atividades").document(politicoId).collection("atividadesPolitico").add(d);
+			db.collection("atividades").document(politicoId).collection("atividadesPolitico")
+					.document(d.getDataDocumento() + d.getIdPolitico() + d.getValorDocumento() + d.getCodDocumento())
+					.create(d);
 		});
 	}
 
@@ -77,11 +79,15 @@ public class FirestoreService {
 		try {
 			List<String> politicosId = getPoliticos().stream().map(p -> p.getId()).collect(Collectors.toList());
 			politicosId.forEach(p -> {
-				db.collection("atividades").document(p).collection("atividadesPolitico").listDocuments().forEach(d -> d.delete());;
+				db.collection("atividades").document(p).collection("proposicoesPolitico").listDocuments()
+						.forEach(d -> d.delete());
+				db.collection("atividades").document(p).collection("despesasPolitico").listDocuments()
+						.forEach(d -> d.delete());
 			});
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
 		}
-		
+
 	}
+
 }
