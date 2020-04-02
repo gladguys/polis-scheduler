@@ -1,9 +1,15 @@
 package com.gladguys.polisscheduler.model;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import lombok.Data;
 
 @Data
 public class Despesa {
+    
     private String ano;
     private TipoAtividade tipoAtividade = TipoAtividade.DESPESA;
     private String fotoPolitico;
@@ -26,4 +32,18 @@ public class Despesa {
     private String valorDocumento;
     private String valorGlosa;
     private String valorLiquido;
+
+
+    public void buildData() {
+        DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date dataDocumentoString = null;
+        
+        try {
+            dataDocumentoString = sdf.parse(this.dataDocumento);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+   
+        this.dataDocumento = new SimpleDateFormat("dd/MM/yyyy").format(dataDocumentoString).toString();
+    }
 }

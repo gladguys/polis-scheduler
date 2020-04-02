@@ -1,8 +1,8 @@
 package com.gladguys.polisscheduler.services;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 import com.gladguys.polisscheduler.model.Despesa;
 import com.gladguys.polisscheduler.model.Politico;
@@ -10,7 +10,6 @@ import com.gladguys.polisscheduler.model.RetornoDespesas;
 import com.gladguys.polisscheduler.utils.DataUtil;
 
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -57,6 +56,7 @@ public class DespesasService {
                 d.setNomePolitico(p.getNomeEleitoral());
                 d.setSiglaPartido(p.getSiglaPartido());
                 d.setFotoPolitico(p.getUrlFoto());
+                d.buildData();
             });
 
             firestoreService.salvarDespesas(despesasDeHoje, p.getId());
