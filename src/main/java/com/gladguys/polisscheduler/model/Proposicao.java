@@ -10,7 +10,7 @@ public class Proposicao {
     private String numero;
     private String ementa;
     private String dataApresentacao;
-    private String dataStatus;
+    private String dataDocumento;
     private String sequencia;
     private String descricaoTramitacao;
     private String descricaoSituacao;

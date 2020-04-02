@@ -71,7 +71,7 @@ public class FirestoreService {
 	public void salvarProposicao(Proposicao proposicao) {
 
 		db.collection("atividades").document(proposicao.getIdPoliticoAutor()).collection("atividadesPolitico")
-				.document(proposicao.getId()).create(proposicao);
+				.document(proposicao.getId()).set(proposicao);
 	}
 
 	public void deleteAllProposicoes() {
