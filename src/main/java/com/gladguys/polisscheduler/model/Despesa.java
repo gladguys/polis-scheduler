@@ -32,6 +32,7 @@ public class Despesa {
     private String valorDocumento;
     private String valorGlosa;
     private String valorLiquido;
+    private String estadoPolitico;
 
 
     public void buildData() {

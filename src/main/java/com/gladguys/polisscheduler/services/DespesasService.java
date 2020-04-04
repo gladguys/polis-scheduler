@@ -56,6 +56,7 @@ public class DespesasService {
                 d.setNomePolitico(p.getNomeEleitoral());
                 d.setSiglaPartido(p.getSiglaPartido());
                 d.setFotoPolitico(p.getUrlFoto());
+                d.setEstadoPolitico(p.getSiglaUf());
                 d.buildData();
             });
 

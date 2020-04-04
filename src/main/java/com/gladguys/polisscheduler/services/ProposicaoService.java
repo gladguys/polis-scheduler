@@ -37,11 +37,24 @@ public class ProposicaoService {
         List<String> politicosId = firestoreService.getPoliticos().stream().map(p -> p.getId())
                 .collect(Collectors.toList());
 
-        String urlProposicoes = URI_PROPOSICAO + "?dataInicio=" + DataUtil.getDataOntem() + "&dataFim="
-                + DataUtil.getDataOntem() + "&itens=100000";
+        String urlProposicoes = URI_PROPOSICAO + "?dataInicio=2020-04-01&dataFim=" + DataUtil.getDataOntem()
+                + "&itens=100000";
 
-        List<RetornoApiSimples> retSimplesProposicoes = this.restTemplate.getForObject(urlProposicoes,
-                RetornoApiProposicoes.class).dados;
+        RetornoApiProposicoes retornoApiProposicoes = this.restTemplate.getForObject(urlProposicoes,
+                RetornoApiProposicoes.class);
+
+        List<RetornoApiSimples> retSimplesProposicoes = retornoApiProposicoes.dados;
+        int pagina = 2;
+        while (retornoApiProposicoes.temMaisPaginasComConteudo()) {
+            urlProposicoes = URI_PROPOSICAO + "?dataInicio="+DataUtil.getDataOntem()+"&dataFim=" + DataUtil.getDataOntem() + "&pagina="
+                    + pagina + "&itens=100000";
+            System.out.println(urlProposicoes);
+            retornoApiProposicoes = this.restTemplate.getForObject(urlProposicoes, RetornoApiProposicoes.class);
+
+            retSimplesProposicoes.addAll(retornoApiProposicoes.dados);
+
+            pagina++;
+        }
 
         retSimplesProposicoes.stream().forEach(prop -> {
             ProposicaoCompleto proposicaoCompleto = this.restTemplate.getForObject(prop.getUri(),
@@ -63,7 +76,8 @@ public class ProposicaoService {
                     proposicao.setIdPoliticoAutor(politicoRetorno.getId());
                     proposicao.setSiglaPartido(politicoRetorno.getUltimoStatus().getSiglaPartido());
                     proposicao.setFotoPolitico(politicoRetorno.getUltimoStatus().getUrlFoto());
-                    
+                    proposicao.setEstadoPolitico(politicoRetorno.getUltimoStatus().getSiglaUf());
+
                     firestoreService.salvarProposicao(proposicao);
                 }
             }

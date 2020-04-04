@@ -22,6 +22,7 @@ public class Proposicao {
     private String tipoAtividade = "PROPOSICAO";
     private String siglaPartido;
     private String fotoPolitico;
+    private String estadoPolitico;
 
 
 }
