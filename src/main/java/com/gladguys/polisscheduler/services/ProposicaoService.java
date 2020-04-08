@@ -12,6 +12,8 @@ import com.gladguys.polisscheduler.model.RetornoApiPoliticosCompleto;
 import com.gladguys.polisscheduler.model.RetornoApiProposicaoCompleto;
 import com.gladguys.polisscheduler.model.RetornoApiProposicoes;
 import com.gladguys.polisscheduler.model.RetornoApiSimples;
+import com.gladguys.polisscheduler.model.RetornoApiTramitacoes;
+import com.gladguys.polisscheduler.model.Tramitacao;
 import com.gladguys.polisscheduler.utils.DataUtil;
 
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -46,7 +48,7 @@ public class ProposicaoService {
         List<RetornoApiSimples> retSimplesProposicoes = retornoApiProposicoes.dados;
         int pagina = 2;
         while (retornoApiProposicoes.temMaisPaginasComConteudo()) {
-            urlProposicoes = URI_PROPOSICAO + "?dataInicio="+DataUtil.getDataOntem()+"&dataFim=" + DataUtil.getDataOntem() + "&pagina="
+            urlProposicoes = URI_PROPOSICAO + "?dataInicio=2020-04-01&dataFim=" + DataUtil.getDataOntem() + "&pagina="
                     + pagina + "&itens=100000";
             System.out.println(urlProposicoes);
             retornoApiProposicoes = this.restTemplate.getForObject(urlProposicoes, RetornoApiProposicoes.class);
@@ -79,10 +81,15 @@ public class ProposicaoService {
                     proposicao.setEstadoPolitico(politicoRetorno.getUltimoStatus().getSiglaUf());
 
                     firestoreService.salvarProposicao(proposicao);
+
+                    List<Tramitacao> tramitacoes = this.restTemplate
+                    .getForObject(URI_PROPOSICAO + "/" + proposicao.getId() + "/tramitacoes", RetornoApiTramitacoes.class).dados;
+                    firestoreService.salvarTramitacoesProposicao(tramitacoes, proposicao.getId());
                 }
             }
 
         });
+
     }
 
     public void deletaProposicoes() {

@@ -4,6 +4,7 @@ import com.gladguys.polisscheduler.model.Despesa;
 import com.gladguys.polisscheduler.model.Partido;
 import com.gladguys.polisscheduler.model.Politico;
 import com.gladguys.polisscheduler.model.Proposicao;
+import com.gladguys.polisscheduler.model.Tramitacao;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
@@ -57,7 +58,8 @@ public class FirestoreService {
 	public void salvarDespesas(List<Despesa> despesas, String politicoId) {
 		despesas.forEach(d -> {
 			db.collection("atividades").document(politicoId).collection("atividadesPolitico")
-					.document(d.getDataDocumento().replace("/", "") + d.getIdPolitico() + d.getValorDocumento().replace(".", "") + d.getCodDocumento())
+					.document(d.getDataDocumento().replace("-", "") + d.getIdPolitico()
+							+ d.getValorDocumento().replace(".", "") + d.getCodDocumento())
 					.create(d);
 		});
 	}
@@ -79,7 +81,7 @@ public class FirestoreService {
 		try {
 			List<String> politicosId = getPoliticos().stream().map(p -> p.getId()).collect(Collectors.toList());
 			politicosId.forEach(p -> {
-				
+
 				db.collection("atividades").document(p).collection("atividadesPolitico").listDocuments()
 						.forEach(d -> d.delete());
 			});
@@ -87,6 +89,13 @@ public class FirestoreService {
 			e.printStackTrace();
 		}
 
+	}
+
+	public void salvarTramitacoesProposicao(List<Tramitacao> tramitacoes, String id) {
+
+		db.collection("tramitacoes").document(id).delete();
+
+		tramitacoes.forEach(t -> db.collection("tramitacoes").document(id).collection("tramitacoesProposicao").add(t));
 	}
 
 }

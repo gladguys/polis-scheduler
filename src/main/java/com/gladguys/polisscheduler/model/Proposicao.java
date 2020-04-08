@@ -24,5 +24,4 @@ public class Proposicao {
     private String fotoPolitico;
     private String estadoPolitico;
 
-
 }

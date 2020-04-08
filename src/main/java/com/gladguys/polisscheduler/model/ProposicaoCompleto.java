@@ -40,8 +40,8 @@ public class ProposicaoCompleto {
         proposicao.setDescricaoTipo(this.descricaoTipo);
         proposicao.setNumero(this.numero);
         proposicao.setEmenta(this.ementa);
-        proposicao.setDataApresentacao(new SimpleDateFormat("dd/MM/yyyy").format(dataApresentacaoDate).toString());
-        proposicao.setDataDocumento(new SimpleDateFormat("dd/MM/yyyy").format(dataHoraDate).toString());
+        proposicao.setDataApresentacao(new SimpleDateFormat("yyyy-MM-dd").format(dataApresentacaoDate).toString());
+        proposicao.setDataDocumento(new SimpleDateFormat("yyyy-MM-dd").format(dataHoraDate).toString());
         proposicao.setSequencia(this.statusProposicao.getSequencia());
         proposicao.setDescricaoTramitacao(this.statusProposicao.getDescricaoTramitacao());
         proposicao.setDescricaoSituacao(this.statusProposicao.getDescricaoSituacao());

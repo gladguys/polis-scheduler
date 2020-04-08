@@ -45,6 +45,6 @@ public class Despesa {
             e.printStackTrace();
         }
    
-        this.dataDocumento = new SimpleDateFormat("dd/MM/yyyy").format(dataDocumentoString).toString();
+        this.dataDocumento = new SimpleDateFormat("yyyy-MM-dd").format(dataDocumentoString).toString();
     }
 }
