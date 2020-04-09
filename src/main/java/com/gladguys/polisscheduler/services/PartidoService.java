@@ -12,7 +12,7 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class PartidoService {
 
-    private static final String URI_PARTIDOS = "https://dadosabertos.camara.leg.br/api/v2/partidos";
+    private static final String URI_PARTIDOS = "https://dadosabertos.camara.leg.br/api/v2/partidos?itens=100";
 
     private final RestTemplate restTemplate;
     private final FirestoreService firestoreService;
@@ -22,9 +22,10 @@ public class PartidoService {
         this.firestoreService = firestoreService;
     }
 
-   public void atualizaPartidos() {
-       List<Partido> partidos =  this.restTemplate.getForObject(URI_PARTIDOS, RetornoApiPartidos.class).dados;
-       this.firestoreService.salvarPartidos(partidos);
-   }
+    public void atualizaPartidos() {
+        List<Partido> partidos = this.restTemplate.getForObject(URI_PARTIDOS, RetornoApiPartidos.class).dados;
+        this.firestoreService.salvarPartidos(partidos);
+        this.firestoreService.updateHashCodeSyncPartidos();
+    }
 
 }

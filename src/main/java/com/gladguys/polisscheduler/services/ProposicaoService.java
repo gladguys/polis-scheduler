@@ -39,7 +39,7 @@ public class ProposicaoService {
         List<String> politicosId = firestoreService.getPoliticos().stream().map(p -> p.getId())
                 .collect(Collectors.toList());
 
-        String urlProposicoes = URI_PROPOSICAO + "?dataInicio=2020-04-01&dataFim=" + DataUtil.getDataOntem()
+        String urlProposicoes = URI_PROPOSICAO + "?dataInicio="+DataUtil.getDataOntem()+"&dataFim=" + DataUtil.getDataOntem()
                 + "&itens=100000";
 
         RetornoApiProposicoes retornoApiProposicoes = this.restTemplate.getForObject(urlProposicoes,
@@ -48,7 +48,7 @@ public class ProposicaoService {
         List<RetornoApiSimples> retSimplesProposicoes = retornoApiProposicoes.dados;
         int pagina = 2;
         while (retornoApiProposicoes.temMaisPaginasComConteudo()) {
-            urlProposicoes = URI_PROPOSICAO + "?dataInicio=2020-04-01&dataFim=" + DataUtil.getDataOntem() + "&pagina="
+            urlProposicoes = URI_PROPOSICAO + "?dataInicio="+DataUtil.getDataOntem()+"&dataFim=" + DataUtil.getDataOntem() + "&pagina="
                     + pagina + "&itens=100000";
             System.out.println(urlProposicoes);
             retornoApiProposicoes = this.restTemplate.getForObject(urlProposicoes, RetornoApiProposicoes.class);

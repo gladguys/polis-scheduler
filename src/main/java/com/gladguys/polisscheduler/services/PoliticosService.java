@@ -30,11 +30,13 @@ public class PoliticosService {
 		List<PoliticoSimples> politicos =
 				this.restTemplate.getForObject(url, RetornoApiPoliticosSimples.class).dados;
 		politicos.forEach(this::salvaPolitico);
+		this.firestoreService.updateHashCodeSyncPoliticos();
 	}
 
 	private void salvaPolitico(PoliticoSimples ps) {
 		PoliticoCompleto pCompleto = this.restTemplate.getForObject(ps.getUri(), RetornoApiPoliticosCompleto.class).dados;
 		Politico politico = PoliticoBuilder.build(pCompleto);
 		firestoreService.addPolitico(politico);
+
 	}
 }
