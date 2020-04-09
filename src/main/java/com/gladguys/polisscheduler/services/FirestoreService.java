@@ -16,6 +16,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -57,6 +59,7 @@ public class FirestoreService {
 
 	public void salvarDespesas(List<Despesa> despesas, String politicoId) {
 		despesas.forEach(d -> {
+			System.out.print(d.getDataDocumento() + "   ");
 			db.collection("atividades").document(politicoId).collection("atividadesPolitico")
 					.document(d.getDataDocumento().replace("-", "") + d.getIdPolitico()
 							+ d.getValorDocumento().replace(".", "") + d.getCodDocumento())
@@ -96,6 +99,11 @@ public class FirestoreService {
 		db.collection("tramitacoes").document(id).delete();
 
 		tramitacoes.forEach(t -> db.collection("tramitacoes").document(id).collection("tramitacoesProposicao").add(t));
+	}
+
+	public void updateHashCodeSyncPartidos() {
+		String hash = LocalDateTime.now().toString();
+		db.collection("sync_log").document("PARTIDOSYNC").update("hash", hash);
 	}
 
 }
