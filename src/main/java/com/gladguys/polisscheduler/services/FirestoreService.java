@@ -37,7 +37,6 @@ public class FirestoreService {
 		QuerySnapshot querySnapshot = query.get();
 		List<QueryDocumentSnapshot> documents = querySnapshot.getDocuments();
 		for (QueryDocumentSnapshot document : documents) {
-			System.out.println("User: " + document.getId());
 		}
 	}
 
@@ -56,13 +55,16 @@ public class FirestoreService {
 	}
 
 	public void salvarDespesas(List<Despesa> despesas, String politicoId) {
-		despesas.forEach(d -> {
-			System.out.print(d.getDataDocumento() + "   ");
-			db.collection("atividades").document(politicoId).collection("atividadesPolitico")
-					.document(d.getDataDocumento().replace("-", "") + d.getIdPolitico()
-							+ d.getValorDocumento().replace(".", "") + d.getCodDocumento())
-					.create(d);
-		});
+		try {
+			despesas.forEach(d -> {
+				db.collection("atividades").document(politicoId).collection("atividadesPolitico")
+						.document(d.getDataDocumento().replace("-", "") + d.getIdPolitico()
+								+ d.getValorDocumento().replace(".", "") + d.getCodDocumento())
+						.create(d);
+			});
+		} catch (Exception e) {
+			System.err.println(e);
+		}
 	}
 
 	public void salvarPartidos(List<Partido> partidos) {
