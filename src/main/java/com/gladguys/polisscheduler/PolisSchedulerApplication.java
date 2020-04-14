@@ -21,7 +21,7 @@ public class PolisSchedulerApplication {
 	static String ENV = "dev";
 
 	public static void main(String[] args) throws IOException {
-		if (args[0] == null || args[0] != "dev") ENV = "prod";
+		if (args.length == 0 || !args[0].equals("dev")) ENV = "prod";
 		else ENV = "dev";
 		
 			SpringApplication.run(PolisSchedulerApplication.class, args);
@@ -31,7 +31,6 @@ public class PolisSchedulerApplication {
 	public Firestore getFirestore() throws IOException {
 
 		InputStream serviceAccount;
-
 		if (ENV.equals("dev")) {
 			serviceAccount = new ClassPathResource("fb_dev.json").getInputStream();
 		} else {
