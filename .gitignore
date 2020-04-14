@@ -29,3 +29,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+##Firebase files
+/src/resources/fb_dev.json
+/src/resources/fb_prod.json
