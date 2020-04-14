@@ -9,7 +9,7 @@ import lombok.Data;
 
 @Data
 public class Despesa {
-    
+
     private String ano;
     private TipoAtividade tipoAtividade = TipoAtividade.DESPESA;
     private String fotoPolitico;
@@ -34,17 +34,18 @@ public class Despesa {
     private String valorLiquido;
     private String estadoPolitico;
 
-
     public void buildData() {
         DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date dataDocumentoString = null;
-        
-        try {
-            dataDocumentoString = sdf.parse(this.dataDocumento);
-        } catch (ParseException e) {
-            e.printStackTrace();
+
+        if (this.dataDocumento != null) {
+            try {
+                dataDocumentoString = sdf.parse(this.dataDocumento);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+            this.dataDocumento = new SimpleDateFormat("yyyy-MM-dd").format(dataDocumentoString).toString();
         }
-   
-        this.dataDocumento = new SimpleDateFormat("yyyy-MM-dd").format(dataDocumentoString).toString();
     }
 }
