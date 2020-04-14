@@ -31,5 +31,5 @@ build/
 .vscode/
 
 ##Firebase files
-/src/resources/fb_dev.json
-/src/resources/fb_prod.json
+/src/main/resources/fb_dev.json
+/src/main/resources/fb_prod.json
