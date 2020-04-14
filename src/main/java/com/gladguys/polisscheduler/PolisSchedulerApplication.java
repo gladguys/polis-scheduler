@@ -18,17 +18,28 @@ import java.io.InputStream;
 @EnableScheduling
 public class PolisSchedulerApplication {
 
+	static String ENV = "dev";
+
 	public static void main(String[] args) throws IOException {
-		SpringApplication.run(PolisSchedulerApplication.class, args);
+		if (args[0] == null || args[0] != "dev") ENV = "prod";
+		else ENV = "dev";
+		
+			SpringApplication.run(PolisSchedulerApplication.class, args);
 	}
 
 	@Bean
 	public Firestore getFirestore() throws IOException {
-		InputStream serviceAccount = new ClassPathResource("polis-7d367-firebase-adminsdk-io5c2-a91fa30f53.json").getInputStream();
+
+		InputStream serviceAccount;
+
+		if (ENV.equals("dev")) {
+			serviceAccount = new ClassPathResource("fb_dev.json").getInputStream();
+		} else {
+			serviceAccount = new ClassPathResource("fb_prod.json").getInputStream();
+		}
+
 		GoogleCredentials credentials = GoogleCredentials.fromStream(serviceAccount);
-		FirebaseOptions options = new FirebaseOptions.Builder()
-				.setCredentials(credentials)
-				.build();
+		FirebaseOptions options = new FirebaseOptions.Builder().setCredentials(credentials).build();
 		FirebaseApp.initializeApp(options);
 
 		return FirestoreClient.getFirestore();
