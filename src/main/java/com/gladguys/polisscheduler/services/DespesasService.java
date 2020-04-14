@@ -3,6 +3,7 @@ package com.gladguys.polisscheduler.services;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import com.gladguys.polisscheduler.model.Despesa;
 import com.gladguys.polisscheduler.model.Politico;
@@ -60,7 +61,9 @@ public class DespesasService {
                 d.buildData();
             });
 
-            firestoreService.salvarDespesas(despesasDeHoje, p.getId());
+            firestoreService.salvarDespesas(
+                    despesasDeHoje.stream().filter(d -> d.getDataDocumento() != null).collect(Collectors.toList()),
+                    p.getId());
         });
     }
 
