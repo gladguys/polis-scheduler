@@ -14,6 +14,8 @@ import com.gladguys.polisscheduler.model.RetornoApiProposicoes;
 import com.gladguys.polisscheduler.model.RetornoApiSimples;
 import com.gladguys.polisscheduler.model.RetornoApiTramitacoes;
 import com.gladguys.polisscheduler.model.Tramitacao;
+import com.gladguys.polisscheduler.services.firestore.FirestorePoliticoService;
+import com.gladguys.polisscheduler.services.firestore.FirestoreProposicaoService;
 import com.gladguys.polisscheduler.utils.DataUtil;
 
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -26,21 +28,24 @@ public class ProposicaoService {
     private static final String URI_PROPOSICAO = "https://dadosabertos.camara.leg.br/api/v2/proposicoes";
 
     private final RestTemplate restTemplate;
-    private final FirestoreService firestoreService;
+    private final FirestoreProposicaoService firestoreService;
+    private final FirestorePoliticoService firestorePoliticoService;
 
-    public ProposicaoService(RestTemplateBuilder restTemplateBuilder, FirestoreService firestoreService) {
+    public ProposicaoService(RestTemplateBuilder restTemplateBuilder, FirestoreProposicaoService firestoreService,
+            FirestorePoliticoService firestorePoliticoService) {
         this.restTemplate = restTemplateBuilder.build();
         this.firestoreService = firestoreService;
+        this.firestorePoliticoService = firestorePoliticoService;
     }
 
     // @Scheduled(cron = "0 48 05 * * ?")
     public void salvarProposicoes() throws InterruptedException, ExecutionException {
 
-        List<String> politicosId = firestoreService.getPoliticos().stream().map(p -> p.getId())
+        List<String> politicosId = firestorePoliticoService.getPoliticos().stream().map(p -> p.getId())
                 .collect(Collectors.toList());
 
-        String urlProposicoes = URI_PROPOSICAO + "?dataInicio="+DataUtil.getDataOntem()+"&dataFim=" + DataUtil.getDataOntem()
-                + "&itens=100000";
+        String urlProposicoes = URI_PROPOSICAO + "?dataInicio=" + DataUtil.getDataOntem() + "&dataFim="
+                + DataUtil.getDataOntem() + "&itens=100000";
 
         RetornoApiProposicoes retornoApiProposicoes = this.restTemplate.getForObject(urlProposicoes,
                 RetornoApiProposicoes.class);
@@ -48,8 +53,8 @@ public class ProposicaoService {
         List<RetornoApiSimples> retSimplesProposicoes = retornoApiProposicoes.dados;
         int pagina = 2;
         while (retornoApiProposicoes.temMaisPaginasComConteudo()) {
-            urlProposicoes = URI_PROPOSICAO + "?dataInicio="+DataUtil.getDataOntem()+"&dataFim=" + DataUtil.getDataOntem() + "&pagina="
-                    + pagina + "&itens=100000";
+            urlProposicoes = URI_PROPOSICAO + "?dataInicio=" + DataUtil.getDataOntem() + "&dataFim="
+                    + DataUtil.getDataOntem() + "&pagina=" + pagina + "&itens=100000";
             System.out.println(urlProposicoes);
             retornoApiProposicoes = this.restTemplate.getForObject(urlProposicoes, RetornoApiProposicoes.class);
 
@@ -82,8 +87,9 @@ public class ProposicaoService {
 
                     firestoreService.salvarProposicao(proposicao);
 
-                    List<Tramitacao> tramitacoes = this.restTemplate
-                    .getForObject(URI_PROPOSICAO + "/" + proposicao.getId() + "/tramitacoes", RetornoApiTramitacoes.class).dados;
+                    List<Tramitacao> tramitacoes = this.restTemplate.getForObject(
+                            URI_PROPOSICAO + "/" + proposicao.getId() + "/tramitacoes",
+                            RetornoApiTramitacoes.class).dados;
                     firestoreService.salvarTramitacoesProposicao(tramitacoes, proposicao.getId());
                 }
             }

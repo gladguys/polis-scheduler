@@ -9,6 +9,7 @@ import com.gladguys.polisscheduler.model.Despesa;
 import com.gladguys.polisscheduler.model.Politico;
 import com.gladguys.polisscheduler.model.RetornoDespesas;
 import com.gladguys.polisscheduler.services.firestore.FirestoreDespesaService;
+import com.gladguys.polisscheduler.services.firestore.FirestorePoliticoService;
 import com.gladguys.polisscheduler.utils.DataUtil;
 
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -22,15 +23,18 @@ public class DespesasService {
 
     private final RestTemplate restTemplate;
     private final FirestoreDespesaService firestoreService;
+    private final FirestorePoliticoService firestorePoliticoService;
 
-    public DespesasService(RestTemplateBuilder restTemplateBuilder, FirestoreDespesaService firestoreService) {
+    public DespesasService(RestTemplateBuilder restTemplateBuilder, FirestoreDespesaService firestoreService,
+            FirestorePoliticoService firestorePoliticoService) {
         this.restTemplate = restTemplateBuilder.build();
         this.firestoreService = firestoreService;
+        this.firestorePoliticoService = firestorePoliticoService;
     }
 
     // @Scheduled(cron = "0 48 05 * * ?")
     public void salvarDespesasDoDia() throws InterruptedException, ExecutionException {
-        List<Politico> politicos = firestoreService.getPoliticos();
+        List<Politico> politicos = firestorePoliticoService.getPoliticos();
         politicos.forEach(p -> {
             int numeroMes = DataUtil.getNumeroMes();
             String urlParaDespesasPolitico = URI_POLITICOS + p.getId() + "/despesas?ano=2020&mes=" + numeroMes
