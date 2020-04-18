@@ -47,34 +47,6 @@ public class FirestoreService {
 		});
 	}
 
-	public void salvarProposicao(Proposicao proposicao) {
-
-		db.collection("atividades").document(proposicao.getIdPoliticoAutor()).collection("atividadesPolitico")
-				.document(proposicao.getId()).set(proposicao);
-	}
-
-	public void deleteAllProposicoes() {
-
-		try {
-			List<String> politicosId = getPoliticos().stream().map(p -> p.getId()).collect(Collectors.toList());
-			politicosId.forEach(p -> {
-
-				db.collection("atividades").document(p).collection("atividadesPolitico").listDocuments()
-						.forEach(d -> d.delete());
-			});
-		} catch (InterruptedException | ExecutionException e) {
-			e.printStackTrace();
-		}
-
-	}
-
-	public void salvarTramitacoesProposicao(List<Tramitacao> tramitacoes, String id) {
-
-		db.collection("tramitacoes").document(id).delete();
-
-		tramitacoes.forEach(t -> db.collection("tramitacoes").document(id).collection("tramitacoesProposicao").add(t));
-	}
-
 	public void updateHashCodeSyncPartidos() {
 		String hash = LocalDateTime.now().toString();
 		db.collection("sync_log").document("PARTIDOSYNC").update("hash", hash);
