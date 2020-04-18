@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import com.gladguys.polisscheduler.model.Despesa;
 import com.gladguys.polisscheduler.model.Politico;
 import com.gladguys.polisscheduler.model.RetornoDespesas;
+import com.gladguys.polisscheduler.services.firestore.FirestoreDespesaService;
 import com.gladguys.polisscheduler.utils.DataUtil;
 
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -20,9 +21,9 @@ public class DespesasService {
     private static final String URI_POLITICOS = "https://dadosabertos.camara.leg.br/api/v2/deputados/";
 
     private final RestTemplate restTemplate;
-    private final FirestoreService firestoreService;
+    private final FirestoreDespesaService firestoreService;
 
-    public DespesasService(RestTemplateBuilder restTemplateBuilder, FirestoreService firestoreService) {
+    public DespesasService(RestTemplateBuilder restTemplateBuilder, FirestoreDespesaService firestoreService) {
         this.restTemplate = restTemplateBuilder.build();
         this.firestoreService = firestoreService;
     }

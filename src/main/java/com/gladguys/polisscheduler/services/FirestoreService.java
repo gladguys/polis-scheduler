@@ -1,6 +1,5 @@
 package com.gladguys.polisscheduler.services;
 
-import com.gladguys.polisscheduler.model.Despesa;
 import com.gladguys.polisscheduler.model.Partido;
 import com.gladguys.polisscheduler.model.Politico;
 import com.gladguys.polisscheduler.model.Proposicao;
@@ -10,11 +9,9 @@ import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
-import com.google.cloud.firestore.WriteResult;
 
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,18 +27,8 @@ public class FirestoreService {
 		this.db = firestore;
 	}
 
-	// @Scheduled(fixedRate = 1000)
-	public void getUsers() throws IOException, ExecutionException, InterruptedException {
-
-		ApiFuture<QuerySnapshot> query = db.collection("users").get();
-		QuerySnapshot querySnapshot = query.get();
-		List<QueryDocumentSnapshot> documents = querySnapshot.getDocuments();
-		for (QueryDocumentSnapshot document : documents) {
-		}
-	}
-
 	public void addPolitico(Politico politico) {
-		ApiFuture<WriteResult> future = db.collection("politicos").document(politico.getId()).set(politico);
+		db.collection("politicos").document(politico.getId()).set(politico);
 	}
 
 	public List<Politico> getPoliticos() throws InterruptedException, ExecutionException {
@@ -52,19 +39,6 @@ public class FirestoreService {
 			politicos.add(document.toObject(Politico.class));
 		}
 		return politicos;
-	}
-
-	public void salvarDespesas(List<Despesa> despesas, String politicoId) {
-		try {
-			despesas.forEach(d -> {
-				db.collection("atividades").document(politicoId).collection("atividadesPolitico")
-						.document(d.getDataDocumento().replace("-", "") + d.getIdPolitico()
-								+ d.getValorDocumento().replace(".", "") + d.getCodDocumento())
-						.create(d);
-			});
-		} catch (Exception e) {
-			System.err.println(e);
-		}
 	}
 
 	public void salvarPartidos(List<Partido> partidos) {
