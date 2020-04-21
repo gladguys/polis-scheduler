@@ -6,7 +6,7 @@ import lombok.Data;
 public class Tramitacao {
 
     private String dataHora; 
-    private String sequencia;
+    private int sequencia;
     private String siglaOrgao;
     private String regime;
     private String descricaoTramitacao; 
