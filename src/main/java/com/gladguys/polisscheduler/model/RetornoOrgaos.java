@@ -8,6 +8,9 @@ import lombok.Data;
 @Data
 public class RetornoOrgaos {
 
-    private List<Orgao> orgaos;
+    private List<Orgao> dados;
 
+    public boolean temOrgaos() {
+        return dados != null && dados.size() > 0;
+    }
 }

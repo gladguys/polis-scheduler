@@ -12,17 +12,18 @@ public class FirestoreReferenciaService {
 
     private final Firestore db;
 
-	public FirestoreReferenciaService(Firestore firestore) {
-		this.db = firestore;
+    public FirestoreReferenciaService(Firestore firestore) {
+        this.db = firestore;
     }
 
     public void salvarOrgaos(List<Orgao> orgaos) {
-
         orgaos.forEach(orgao -> {
             String sigla = orgao.getSigla();
-            db.collection("orgaos").document(sigla).set(orgao);
+            if (sigla != null && !sigla.equals("")) {
+                sigla = sigla.replace(" ", "").replace(".", "").replace("/", "-");
+                db.collection("orgaos").document(sigla).set(orgao);
+            }
         });
-    
     }
 
 }
