@@ -23,4 +23,9 @@ public class FirestoreService {
 		String hash = LocalDateTime.now().toString();
 		db.collection("sync_log").document("POLITICOSYNC").update("hash", hash);
 	}
+
+	public void updateHashCodeSyncOrgaos() {
+		String hash = LocalDateTime.now().toString();
+		db.collection("sync_log").document("ORGAOSSYNC").update("hash", hash);
+	}
 }
