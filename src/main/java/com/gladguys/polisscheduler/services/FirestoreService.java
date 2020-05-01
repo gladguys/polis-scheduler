@@ -4,6 +4,8 @@ import com.google.cloud.firestore.Firestore;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class FirestoreService {
@@ -15,17 +17,21 @@ public class FirestoreService {
 	}
 
 	public void updateHashCodeSyncPartidos() {
-		String hash = LocalDateTime.now().toString();
-		db.collection("sync_log").document("PARTIDOSYNC").update("hash", hash);
+		db.collection("sync_log").document("PARTIDOSYNC").set(getMapAttrHashValue());
 	}
 
 	public void updateHashCodeSyncPoliticos() {
-		String hash = LocalDateTime.now().toString();
-		db.collection("sync_log").document("POLITICOSYNC").update("hash", hash);
+		db.collection("sync_log").document("POLITICOSYNC").set(getMapAttrHashValue());
 	}
 
 	public void updateHashCodeSyncOrgaos() {
+		db.collection("sync_log").document("ORGAOSYNC").set(getMapAttrHashValue());
+	}
+
+	private Map<String, Object> getMapAttrHashValue() {
 		String hash = LocalDateTime.now().toString();
-		db.collection("sync_log").document("ORGAOSSYNC").update("hash", hash);
+		Map<String, Object> data = new HashMap<>();
+		data.put("hash", hash);
+		return data;
 	}
 }
