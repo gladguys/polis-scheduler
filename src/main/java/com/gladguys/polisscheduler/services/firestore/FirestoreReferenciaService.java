@@ -20,7 +20,7 @@ public class FirestoreReferenciaService {
         orgaos.forEach(orgao -> {
             String sigla = orgao.getSigla();
             if (sigla != null && !sigla.equals("")) {
-                sigla = sigla.replace(" ", "").replace(".", "").replace("/", "-");
+                sigla = sigla.replaceAll("/| |\\.", "-");
                 db.collection("orgaos").document(sigla).set(orgao);
             }
         });
