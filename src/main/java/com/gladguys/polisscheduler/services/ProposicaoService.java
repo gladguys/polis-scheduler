@@ -44,7 +44,7 @@ public class ProposicaoService {
         List<String> politicosId = firestorePoliticoService.getPoliticos().stream().map(p -> p.getId())
                 .collect(Collectors.toList());
 
-        String urlProposicoes = URI_PROPOSICAO + "?dataInicio=" + DataUtil.getDataOntem() + "&dataFim="
+        String urlProposicoes = URI_PROPOSICAO + "?dataApresentacaoInicio=" + DataUtil.getDataOntem() + "&dataApresentacaoFim="
                 + DataUtil.getDataOntem() + "&itens=100000";
 
         RetornoApiProposicoes retornoApiProposicoes = this.restTemplate.getForObject(urlProposicoes,
@@ -53,7 +53,7 @@ public class ProposicaoService {
         List<RetornoApiSimples> retSimplesProposicoes = retornoApiProposicoes.dados;
         int pagina = 2;
         while (retornoApiProposicoes.temMaisPaginasComConteudo()) {
-            urlProposicoes = URI_PROPOSICAO + "?dataInicio=" + DataUtil.getDataOntem() + "&dataFim="
+            urlProposicoes = URI_PROPOSICAO + "?dataApresentacaoInicio=" + DataUtil.getDataOntem() + "&dataApresentacaoFim="
                     + DataUtil.getDataOntem() + "&pagina=" + pagina + "&itens=100000";
             System.out.println(urlProposicoes);
             retornoApiProposicoes = this.restTemplate.getForObject(urlProposicoes, RetornoApiProposicoes.class);
@@ -63,38 +63,46 @@ public class ProposicaoService {
             pagina++;
         }
 
-        retSimplesProposicoes.stream().forEach(prop -> {
-            ProposicaoCompleto proposicaoCompleto = this.restTemplate.getForObject(prop.getUri(),
-                    RetornoApiProposicaoCompleto.class).dados;
+        try {
 
-            RetornoApiSimples retPolitico = this.restTemplate
-                    .getForObject(proposicaoCompleto.getUriAutores(), RetornoApiAutoresProposicao.class).getDados()
-                    .get(0);
+                retSimplesProposicoes.stream().forEach(prop -> {
+                    ProposicaoCompleto proposicaoCompleto = this.restTemplate.getForObject(prop.getUri(),
+                            RetornoApiProposicaoCompleto.class).dados;
+                        
+                        System.out.println(proposicaoCompleto.getUriAutores());
+                    RetornoApiSimples retPolitico = this.restTemplate
+                            .getForObject(proposicaoCompleto.getUriAutores(), RetornoApiAutoresProposicao.class).getDados()
+                            .get(0);
+                            
+                    if (retPolitico.getUri() != null && retPolitico.getUri() != "") {
+        
+                        PoliticoCompleto politicoRetorno = this.restTemplate.getForObject(retPolitico.getUri(),
+                                RetornoApiPoliticosCompleto.class).dados;
+                        
+                                System.out.println("cpf: " + politicoRetorno.getCpf());
 
-            if (retPolitico.getUri() != null && retPolitico.getUri() != "") {
-
-                PoliticoCompleto politicoRetorno = this.restTemplate.getForObject(retPolitico.getUri(),
-                        RetornoApiPoliticosCompleto.class).dados;
-
-                if (politicosId.contains(politicoRetorno.getId())) {
-
-                    Proposicao proposicao = proposicaoCompleto.build();
-                    proposicao.setNomePolitico(politicoRetorno.getUltimoStatus().getNomeEleitoral());
-                    proposicao.setIdPoliticoAutor(politicoRetorno.getId());
-                    proposicao.setSiglaPartido(politicoRetorno.getUltimoStatus().getSiglaPartido());
-                    proposicao.setFotoPolitico(politicoRetorno.getUltimoStatus().getUrlFoto());
-                    proposicao.setEstadoPolitico(politicoRetorno.getUltimoStatus().getSiglaUf());
-
-                    firestoreService.salvarProposicao(proposicao);
-
-                    List<Tramitacao> tramitacoes = this.restTemplate.getForObject(
-                            URI_PROPOSICAO + "/" + proposicao.getId() + "/tramitacoes",
-                            RetornoApiTramitacoes.class).dados;
-                    firestoreService.salvarTramitacoesProposicao(tramitacoes, proposicao.getId());
-                }
-            }
-
-        });
+                        if (politicosId.contains(politicoRetorno.getId())) {
+        
+                            Proposicao proposicao = proposicaoCompleto.build();
+                            proposicao.setNomePolitico(politicoRetorno.getUltimoStatus().getNomeEleitoral());
+                            proposicao.setIdPoliticoAutor(politicoRetorno.getId());
+                            proposicao.setSiglaPartido(politicoRetorno.getUltimoStatus().getSiglaPartido());
+                            proposicao.setFotoPolitico(politicoRetorno.getUltimoStatus().getUrlFoto());
+                            proposicao.setEstadoPolitico(politicoRetorno.getUltimoStatus().getSiglaUf());
+                                
+                            firestoreService.salvarProposicao(proposicao);
+        
+                            List<Tramitacao> tramitacoes = this.restTemplate.getForObject(
+                                    URI_PROPOSICAO + "/" + proposicao.getId() + "/tramitacoes",
+                                    RetornoApiTramitacoes.class).dados;
+                            firestoreService.salvarTramitacoesProposicao(tramitacoes, proposicao.getId());
+                        }
+                    }
+        
+                });
+        } catch (Exception e) {
+                System.err.println(e);
+        }
 
     }
 
