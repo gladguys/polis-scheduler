@@ -24,4 +24,12 @@ public class Proposicao {
     private String fotoPolitico;
     private String estadoPolitico;
 
+    public void configuraDadosPoliticoNaProposicao(PoliticoCompleto politicoRetorno) {
+        this.setNomePolitico(politicoRetorno.getUltimoStatus().getNomeEleitoral());
+        this.setIdPoliticoAutor(politicoRetorno.getId());
+        this.setSiglaPartido(politicoRetorno.getUltimoStatus().getSiglaPartido());
+        this.setFotoPolitico(politicoRetorno.getUltimoStatus().getUrlFoto());
+        this.setEstadoPolitico(politicoRetorno.getUltimoStatus().getSiglaUf());
+    }
+
 }

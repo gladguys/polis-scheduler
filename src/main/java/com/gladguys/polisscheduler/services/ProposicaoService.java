@@ -90,24 +90,11 @@ public class ProposicaoService {
                                                         && politicosId.contains(politicoRetorno.getId())) {
 
                                                 Proposicao proposicao = proposicaoCompleto.build();
-                                                proposicao.setNomePolitico(
-                                                                politicoRetorno.getUltimoStatus().getNomeEleitoral());
-                                                proposicao.setIdPoliticoAutor(politicoRetorno.getId());
-                                                proposicao.setSiglaPartido(
-                                                                politicoRetorno.getUltimoStatus().getSiglaPartido());
-                                                proposicao.setFotoPolitico(
-                                                                politicoRetorno.getUltimoStatus().getUrlFoto());
-                                                proposicao.setEstadoPolitico(
-                                                                politicoRetorno.getUltimoStatus().getSiglaUf());
-
+                                                proposicao.configuraDadosPoliticoNaProposicao(politicoRetorno);
                                                 firestoreService.salvarProposicao(proposicao);
 
-                                                List<Tramitacao> tramitacoes = this.restTemplate.getForObject(
-                                                                URI_PROPOSICAO + "/" + proposicao.getId()
-                                                                                + "/tramitacoes",
-                                                                RetornoApiTramitacoes.class).dados;
-                                                firestoreService.salvarTramitacoesProposicao(tramitacoes,
-                                                                proposicao.getId());
+                                                List<Tramitacao> tramitacoes = getTramitacoes(proposicao);
+                                                firestoreService.salvarTramitacoesProposicao(tramitacoes,proposicao.getId());
                                         }
                                 }
 
@@ -117,6 +104,16 @@ public class ProposicaoService {
                         throw e;
                 }
 
+        }
+
+        private List<Tramitacao> getTramitacoes(Proposicao proposicao) {
+                return this.restTemplate.getForObject(
+                        URI_PROPOSICAO + 
+                        "/" + 
+                        proposicao.getId() + 
+                        "/tramitacoes",
+                        RetornoApiTramitacoes.class).dados;
+                                                
         }
 
         public void deletaProposicoes() {
