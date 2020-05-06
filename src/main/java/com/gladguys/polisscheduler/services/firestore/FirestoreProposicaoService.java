@@ -40,7 +40,10 @@ public class FirestoreProposicaoService {
                     .collect(Collectors.toList());
             politicosId.forEach(p -> {
 
-                db.collection("atividades").document(p).collection("atividadesPolitico").listDocuments()
+                db.collection("atividades")
+                        .document(p)
+                        .collection("atividadesPolitico")
+                        .listDocuments()
                         .forEach(d -> d.delete());
             });
         } catch (InterruptedException | ExecutionException e) {
@@ -52,15 +55,22 @@ public class FirestoreProposicaoService {
 
         db.collection("tramitacoes").document(id).delete();
 
-        tramitacoes.forEach(t -> db.collection("tramitacoes").document(id).collection("tramitacoesProposicao")
-                .document(String.valueOf(t.getSequencia())).set(t));
+        tramitacoes.forEach(t ->
+                db.collection("tramitacoes")
+                        .document(id)
+                        .collection("tramitacoesProposicao")
+                        .document(String.valueOf(t.getSequencia())).set(t));
     }
 
     public List<Proposicao> getProposicoes() throws InterruptedException, ExecutionException {
         final List<Proposicao> proposicoes = new ArrayList<>();
 
-        final List<String> politicosIds = firestorePoliticoService.getPoliticos().stream().map(Politico::getId)
-                .collect(Collectors.toList());
+        final List<String> politicosIds =
+                firestorePoliticoService
+                        .getPoliticos()
+                        .stream()
+                        .map(Politico::getId)
+                        .collect(Collectors.toList());
 
         politicosIds.forEach(id -> {
             try {
@@ -84,8 +94,12 @@ public class FirestoreProposicaoService {
 
         List<Proposicao> proposicoesPolitico = new ArrayList<>();
 
-        final ApiFuture<QuerySnapshot> future = db.collection("atividades").document(idPolitico)
-                .collection("atividadesPolitico").whereEqualTo("tipoAtividade", "PROPOSICAO").get();
+        final ApiFuture<QuerySnapshot> future =
+                db.collection("atividades")
+                        .document(idPolitico)
+                        .collection("atividadesPolitico")
+                        .whereEqualTo("tipoAtividade", "PROPOSICAO")
+                        .get();
 
         final List<QueryDocumentSnapshot> documents = future.get().getDocuments();
         for (final DocumentSnapshot document : documents) {
