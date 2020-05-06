@@ -45,75 +45,65 @@ public class ProposicaoService {
         // @Scheduled(cron = "0 48 05 * * ?")
         public void salvarProposicoes() throws InterruptedException, ExecutionException {
 
-                // List<String> politicosId =
-                // firestorePoliticoService.getPoliticos().stream().map(p -> p.getId())
-                // .collect(Collectors.toList());
+                List<String> politicosId = 
+                        firestorePoliticoService
+                                .getPoliticos()
+                                .stream()
+                                .map(p -> p.getId())
+                                .collect(Collectors.toList());
+                
+                String urlProposicoes = URI_PROPOSICAO + "?dataApresentacaoInicio=" + DataUtil.getDataOntem()
+                                + "&dataApresentacaoFim=" + DataUtil.getDataOntem() + "&itens=100000";
 
-                // String urlProposicoes = URI_PROPOSICAO + "?dataApresentacaoInicio=" +
-                // DataUtil.getDataOntem()
-                // + "&dataApresentacaoFim=" + DataUtil.getDataOntem() + "&itens=100000";
+                RetornoApiProposicoes retornoApiProposicoes = 
+                        this.restTemplate.getForObject(urlProposicoes,RetornoApiProposicoes.class);
 
-                // RetornoApiProposicoes retornoApiProposicoes =
-                // this.restTemplate.getForObject(urlProposicoes,
-                // RetornoApiProposicoes.class);
-
-                // List<RetornoApiSimples> retSimplesProposicoes = retornoApiProposicoes.dados;
-                // int pagina = 2;
-                // while (retornoApiProposicoes.temMaisPaginasComConteudo()) {
-                // urlProposicoes = URI_PROPOSICAO + "?dataApresentacaoInicio=" +
-                // DataUtil.getDataOntem()
-                // + "&dataApresentacaoFim=" + DataUtil.getDataOntem() + "&pagina=" + pagina
-                // + "&itens=100000";
-                // retornoApiProposicoes = this.restTemplate.getForObject(urlProposicoes,
-                // RetornoApiProposicoes.class);
-
-                // retSimplesProposicoes.addAll(retornoApiProposicoes.dados);
-
-                // pagina++;
-                // }
-
-                // try {
-
-                // retSimplesProposicoes.stream().forEach(prop -> {
-                // ProposicaoCompleto proposicaoCompleto =
-                // this.restTemplate.getForObject(prop.getUri(),
-                // RetornoApiProposicaoCompleto.class).dados;
-
-                // List<RetornoApiSimples> autores = this.restTemplate
-                // .getForObject(proposicaoCompleto.getUriAutores(),
-                // RetornoApiAutoresProposicao.class)
-                // .getDados();
-
-                // RetornoApiSimples retPolitico = null;
-
-                // if (autores.size() > 0) {
-                // retPolitico = autores.get(0);
-                // }
-
-                // if (retPolitico != null && retPolitico.getUri() != null &&
-                // retPolitico.getUri() != "") {
-
-                // PoliticoCompleto politicoRetorno = this.restTemplate.getForObject(
-                // retPolitico.getUri(), RetornoApiPoliticosCompleto.class).dados;
-
-                // if (politicoRetorno.getId() != null
-                // && politicosId.contains(politicoRetorno.getId())) {
-
-                // Proposicao proposicao = proposicaoCompleto.build();
-                // proposicao.configuraDadosPoliticoNaProposicao(politicoRetorno);
-                // firestoreProposicaoService.salvarProposicao(proposicao);
-
-                // List<Tramitacao> tramitacoes = getTramitacoes(proposicao);
-                // firestoreProposicaoService.salvarTramitacoesProposicao(tramitacoes,
-                // proposicao.getId());
-                // }
-                // }
-
-                // });
-                // } catch (Exception e) {
-                // System.err.println(e);
-                // throw e;
-                // }
+                List<RetornoApiSimples> retSimplesProposicoes = retornoApiProposicoes.dados;
+                
+                int pagina = 2;
+                while (retornoApiProposicoes.temMaisPaginasComConteudo()) {
+                        urlProposicoes = URI_PROPOSICAO + "?dataApresentacaoInicio=" + DataUtil.getDataOntem()
+                                        + "&dataApresentacaoFim=" + DataUtil.getDataOntem() + "&pagina=" + pagina
+                                        + "&itens=100000";
+                        retornoApiProposicoes = this.restTemplate.getForObject(urlProposicoes,
+                                        RetornoApiProposicoes.class);
+                        retSimplesProposicoes.addAll(retornoApiProposicoes.dados);
+                        pagina++;
+                }
+                
+                try {
+                        retSimplesProposicoes.stream().forEach(prop -> {
+                                ProposicaoCompleto proposicaoCompleto = this.restTemplate.getForObject(prop.getUri(),
+                                                RetornoApiProposicaoCompleto.class).dados;
+                                List<RetornoApiSimples> autores = this.restTemplate
+                                                .getForObject(proposicaoCompleto.getUriAutores(),
+                                                                RetornoApiAutoresProposicao.class)
+                                                .getDados();
+                                RetornoApiSimples retPolitico = null;
+                                if (autores.size() > 0) {
+                                        retPolitico = autores.get(0);
+                                }
+                                if (retPolitico != null && retPolitico.getUri() != null && retPolitico.getUri() != "") {
+                                        PoliticoCompleto politicoRetorno = 
+                                                this.restTemplate.getForObject(
+                                                        retPolitico.getUri(), RetornoApiPoliticosCompleto.class).dados;
+                                        
+                                        if (politicoRetorno.getId() != null && politicosId.contains(politicoRetorno.getId())) {
+                                                
+                                                Proposicao proposicao = proposicaoCompleto.build();
+                                                proposicao.configuraDadosPoliticoNaProposicao(politicoRetorno);
+                                                firestoreProposicaoService.salvarProposicao(proposicao);
+                                                
+                                                List<Tramitacao> tramitacoes = getTramitacoes(proposicao);
+                                                firestoreProposicaoService.salvarTramitacoesProposicao(tramitacoes,
+                                                                proposicao.getId());
+                                        }
+                                }
+                        });
+                } catch (Exception e) {
+                        System.err.println(e);
+                        throw e;
+                }
 
                 atualizaTramitacoes();
 
@@ -137,6 +127,7 @@ public class ProposicaoService {
 
                                                 firestoreProposicaoService.salvarTramitacoesProposicao(tramitacoesNovas,
                                                                 p.getId());
+                                                atualizarProposicaoComNovasTramitacoes(p);
 
                                         }
 
@@ -148,6 +139,14 @@ public class ProposicaoService {
                 } catch (InterruptedException | ExecutionException e) {
                         e.printStackTrace();
                 }
+        }
+
+        private void atualizarProposicaoComNovasTramitacoes(Proposicao proposicao) {
+                proposicao.setFoiAtualizada(true);
+                // TODO: pegar data ou da ultima tramitacao ou de agora
+                proposicao.setDataAtualizacao("2020-01-01");
+
+                firestoreProposicaoService.salvarProposicao(proposicao);
         }
 
         private List<Tramitacao> getTramitacoes(Proposicao proposicao) {
