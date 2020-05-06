@@ -22,7 +22,6 @@ public class ProposicaoCompleto {
     public Proposicao build() {
         DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
         Date dataApresentacaoDate = null;
-        Date dataHoraDate = null;
         
         try {
             dataApresentacaoDate = sdf.parse(this.dataApresentacao);
@@ -36,6 +35,7 @@ public class ProposicaoCompleto {
         proposicao.setNumero(this.numero);
         proposicao.setEmenta(this.ementa);
         proposicao.setDataApresentacao(new SimpleDateFormat("yyyy-MM-dd").format(dataApresentacaoDate).toString());
+        proposicao.setDataAtualizacao(proposicao.getDataApresentacao());
         proposicao.setEmentaDetalhada(this.ementaDetalhada);
         
 

@@ -1,6 +1,8 @@
 package com.gladguys.polisscheduler.services;
 
+import com.gladguys.polisscheduler.services.firestore.FirestorePoliticoService;
 import com.google.cloud.firestore.Firestore;
+
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -11,9 +13,11 @@ import java.util.Map;
 public class FirestoreService {
 
 	private final Firestore db;
+	private FirestorePoliticoService firestorePoliticoService;
 
-	public FirestoreService(Firestore firestore) {
+	public FirestoreService(final Firestore firestore, FirestorePoliticoService firestorePoliticoService) {
 		this.db = firestore;
+		this.firestorePoliticoService = firestorePoliticoService;
 	}
 
 	public void updateHashCodeSyncPartidos() {
@@ -29,8 +33,8 @@ public class FirestoreService {
 	}
 
 	private Map<String, Object> getMapAttrHashValue() {
-		String hash = LocalDateTime.now().toString();
-		Map<String, Object> data = new HashMap<>();
+		final String hash = LocalDateTime.now().toString();
+		final Map<String, Object> data = new HashMap<>();
 		data.put("hash", hash);
 		return data;
 	}

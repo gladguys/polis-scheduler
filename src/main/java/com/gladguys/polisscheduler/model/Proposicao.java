@@ -23,6 +23,8 @@ public class Proposicao {
     private String siglaPartido;
     private String fotoPolitico;
     private String estadoPolitico;
+    private boolean foiAtualizada;
+    private String dataAtualizacao;
 
     public void configuraDadosPoliticoNaProposicao(PoliticoCompleto politicoRetorno) {
         this.setNomePolitico(politicoRetorno.getUltimoStatus().getNomeEleitoral());
