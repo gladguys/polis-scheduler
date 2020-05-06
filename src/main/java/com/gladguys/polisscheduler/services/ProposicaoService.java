@@ -77,7 +77,7 @@ public class ProposicaoService {
 
                                 RetornoApiSimples retPolitico = null;
 
-                                if (autores.size() == 0) {
+                                if (autores.size() > 0) {
                                         retPolitico = autores.get(0);
                                 }
 
