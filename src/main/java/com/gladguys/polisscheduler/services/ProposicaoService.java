@@ -45,68 +45,74 @@ public class ProposicaoService {
         // @Scheduled(cron = "0 48 05 * * ?")
         public void salvarProposicoes() throws InterruptedException, ExecutionException {
 
-                // List<String> politicosId = firestorePoliticoService.getPoliticos().stream().map(p -> p.getId())
-                //                 .collect(Collectors.toList());
+                // List<String> politicosId =
+                // firestorePoliticoService.getPoliticos().stream().map(p -> p.getId())
+                // .collect(Collectors.toList());
 
-                // String urlProposicoes = URI_PROPOSICAO + "?dataApresentacaoInicio=" + DataUtil.getDataOntem()
-                //                 + "&dataApresentacaoFim=" + DataUtil.getDataOntem() + "&itens=100000";
+                // String urlProposicoes = URI_PROPOSICAO + "?dataApresentacaoInicio=" +
+                // DataUtil.getDataOntem()
+                // + "&dataApresentacaoFim=" + DataUtil.getDataOntem() + "&itens=100000";
 
-                // RetornoApiProposicoes retornoApiProposicoes = this.restTemplate.getForObject(urlProposicoes,
-                //                 RetornoApiProposicoes.class);
+                // RetornoApiProposicoes retornoApiProposicoes =
+                // this.restTemplate.getForObject(urlProposicoes,
+                // RetornoApiProposicoes.class);
 
                 // List<RetornoApiSimples> retSimplesProposicoes = retornoApiProposicoes.dados;
                 // int pagina = 2;
                 // while (retornoApiProposicoes.temMaisPaginasComConteudo()) {
-                //         urlProposicoes = URI_PROPOSICAO + "?dataApresentacaoInicio=" + DataUtil.getDataOntem()
-                //                         + "&dataApresentacaoFim=" + DataUtil.getDataOntem() + "&pagina=" + pagina
-                //                         + "&itens=100000";
-                //         retornoApiProposicoes = this.restTemplate.getForObject(urlProposicoes,
-                //                         RetornoApiProposicoes.class);
+                // urlProposicoes = URI_PROPOSICAO + "?dataApresentacaoInicio=" +
+                // DataUtil.getDataOntem()
+                // + "&dataApresentacaoFim=" + DataUtil.getDataOntem() + "&pagina=" + pagina
+                // + "&itens=100000";
+                // retornoApiProposicoes = this.restTemplate.getForObject(urlProposicoes,
+                // RetornoApiProposicoes.class);
 
-                //         retSimplesProposicoes.addAll(retornoApiProposicoes.dados);
+                // retSimplesProposicoes.addAll(retornoApiProposicoes.dados);
 
-                //         pagina++;
+                // pagina++;
                 // }
 
                 // try {
 
-                //         retSimplesProposicoes.stream().forEach(prop -> {
-                //                 ProposicaoCompleto proposicaoCompleto = this.restTemplate.getForObject(prop.getUri(),
-                //                                 RetornoApiProposicaoCompleto.class).dados;
+                // retSimplesProposicoes.stream().forEach(prop -> {
+                // ProposicaoCompleto proposicaoCompleto =
+                // this.restTemplate.getForObject(prop.getUri(),
+                // RetornoApiProposicaoCompleto.class).dados;
 
-                //                 List<RetornoApiSimples> autores = this.restTemplate
-                //                                 .getForObject(proposicaoCompleto.getUriAutores(),
-                //                                                 RetornoApiAutoresProposicao.class)
-                //                                 .getDados();
+                // List<RetornoApiSimples> autores = this.restTemplate
+                // .getForObject(proposicaoCompleto.getUriAutores(),
+                // RetornoApiAutoresProposicao.class)
+                // .getDados();
 
-                //                 RetornoApiSimples retPolitico = null;
+                // RetornoApiSimples retPolitico = null;
 
-                //                 if (autores.size() > 0) {
-                //                         retPolitico = autores.get(0);
-                //                 }
+                // if (autores.size() > 0) {
+                // retPolitico = autores.get(0);
+                // }
 
-                //                 if (retPolitico != null && retPolitico.getUri() != null && retPolitico.getUri() != "") {
+                // if (retPolitico != null && retPolitico.getUri() != null &&
+                // retPolitico.getUri() != "") {
 
-                //                         PoliticoCompleto politicoRetorno = this.restTemplate.getForObject(
-                //                                         retPolitico.getUri(), RetornoApiPoliticosCompleto.class).dados;
+                // PoliticoCompleto politicoRetorno = this.restTemplate.getForObject(
+                // retPolitico.getUri(), RetornoApiPoliticosCompleto.class).dados;
 
-                //                         if (politicoRetorno.getId() != null
-                //                                         && politicosId.contains(politicoRetorno.getId())) {
+                // if (politicoRetorno.getId() != null
+                // && politicosId.contains(politicoRetorno.getId())) {
 
-                //                                 Proposicao proposicao = proposicaoCompleto.build();
-                //                                 proposicao.configuraDadosPoliticoNaProposicao(politicoRetorno);
-                //                                 firestoreProposicaoService.salvarProposicao(proposicao);
+                // Proposicao proposicao = proposicaoCompleto.build();
+                // proposicao.configuraDadosPoliticoNaProposicao(politicoRetorno);
+                // firestoreProposicaoService.salvarProposicao(proposicao);
 
-                //                                 List<Tramitacao> tramitacoes = getTramitacoes(proposicao);
-                //                                 firestoreProposicaoService.salvarTramitacoesProposicao(tramitacoes,
-                //                                                 proposicao.getId());
-                //                         }
-                //                 }
+                // List<Tramitacao> tramitacoes = getTramitacoes(proposicao);
+                // firestoreProposicaoService.salvarTramitacoesProposicao(tramitacoes,
+                // proposicao.getId());
+                // }
+                // }
 
-                //         });
+                // });
                 // } catch (Exception e) {
-                //         System.err.println(e);
-                //         throw e;
+                // System.err.println(e);
+                // throw e;
                 // }
 
                 atualizaTramitacoes();
@@ -119,25 +125,35 @@ public class ProposicaoService {
                         proposicoesNoFirestore.forEach(p -> System.out.println(p.getDataApresentacao()));
 
                         proposicoesNoFirestore.forEach(p -> {
+                                try {
+                                        List<Tramitacao> tramitacoesNovas = getTramitacoes(p);
+                                        int quantidadeTramitacoesAtual;
 
-                                List<Tramitacao> tramitacoes = getTramitacoes(p);
+                                        quantidadeTramitacoesAtual = firestoreProposicaoService
+                                                        .getQuantidadeTramitacoes(p.getId());
+
+                                        if (tramitacoesNovas.size() > 0
+                                                        && tramitacoesNovas.size() > quantidadeTramitacoesAtual) {
+
+                                                firestoreProposicaoService.salvarTramitacoesProposicao(tramitacoesNovas,
+                                                                p.getId());
+
+                                        }
+
+                                } catch (InterruptedException | ExecutionException e) {
+                                        e.printStackTrace();
+                                }
                         });
 
                 } catch (InterruptedException | ExecutionException e) {
-                        // TODO Auto-generated catch block
                         e.printStackTrace();
                 }
         }
 
-
         private List<Tramitacao> getTramitacoes(Proposicao proposicao) {
-                return this.restTemplate.getForObject(
-                        URI_PROPOSICAO + 
-                        "/" + 
-                        proposicao.getId() + 
-                        "/tramitacoes",
-                        RetornoApiTramitacoes.class).dados;
-                                                
+                return this.restTemplate.getForObject(URI_PROPOSICAO + "/" + proposicao.getId() + "/tramitacoes",
+                                RetornoApiTramitacoes.class).dados;
+
         }
 
         public void deletaProposicoes() {

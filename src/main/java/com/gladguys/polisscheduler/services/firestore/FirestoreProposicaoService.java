@@ -72,6 +72,12 @@ public class FirestoreProposicaoService {
         return proposicoes;
     }
 
+    public int getQuantidadeTramitacoes(String proposicaoId) throws InterruptedException, ExecutionException {
+
+        return db.collection("tramitacoes").document(proposicaoId).collection("tramitacoesProposicao").get().get()
+                .getDocuments().size();
+    }
+
     private List<Proposicao> getProposicoesPoliticoByIdPolitico(String idPolitico)
             throws InterruptedException, ExecutionException {
 
