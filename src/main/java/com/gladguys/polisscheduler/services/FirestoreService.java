@@ -42,42 +42,6 @@ public class FirestoreService {
 		db.collection("sync_log").document("ORGAOSYNC").set(getMapAttrHashValue());
 	}
 
-	public List<Proposicao> getProposicoes() throws InterruptedException, ExecutionException {
-		final List<Proposicao> proposicoes = new ArrayList();
-
-		final List<String> politicosIds = firestorePoliticoService.getPoliticos().stream().map(Politico::getId)
-				.collect(Collectors.toList());
-
-		politicosIds.forEach(id -> {
-			try {
-				proposicoes.addAll(getProposicoesPoliticoByIdPolitico(id));
-			} catch (InterruptedException | ExecutionException e) {
-				e.printStackTrace();
-			}
-		});
-
-		return proposicoes;
-	}
-
-	private List<Proposicao> getProposicoesPoliticoByIdPolitico(String idPolitico)
-			throws InterruptedException, ExecutionException {
-				
-		List<Proposicao> proposicoesPolitico = new ArrayList();
-
-		final ApiFuture<QuerySnapshot> future = 
-			db.collection("atividades")
-				.document(idPolitico)
-				.collection("atividadesPolitico")
-				.whereEqualTo("tipoAtividade", "PROPOSICAO")
-				.get();
-		
-				final List<QueryDocumentSnapshot> documents = future.get().getDocuments();
-		for (final DocumentSnapshot document : documents) {
-			proposicoesPolitico.add(document.toObject(Proposicao.class));
-		}
-		return proposicoesPolitico;
-	}
-
 	private Map<String, Object> getMapAttrHashValue() {
 		final String hash = LocalDateTime.now().toString();
 		final Map<String, Object> data = new HashMap<>();

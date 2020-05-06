@@ -115,8 +115,13 @@ public class ProposicaoService {
 
         public void atualizaTramitacoes() {
                 try {
-                        List<Proposicao> proposicoesNoFirestore = firestoreService.getProposicoes();
+                        List<Proposicao> proposicoesNoFirestore = firestoreProposicaoService.getProposicoes();
                         proposicoesNoFirestore.forEach(p -> System.out.println(p.getDataApresentacao()));
+
+                        proposicoesNoFirestore.forEach(p -> {
+
+                                List<Tramitacao> tramitacoes = getTramitacoes(p);
+                        });
 
                 } catch (InterruptedException | ExecutionException e) {
                         // TODO Auto-generated catch block
