@@ -52,7 +52,8 @@ public class FirestoreProposicaoService {
 
         db.collection("tramitacoes").document(id).delete();
 
-        tramitacoes.forEach(t -> db.collection("tramitacoes").document(id).collection("tramitacoesProposicao").add(t));
+        tramitacoes.forEach(t -> db.collection("tramitacoes").document(id).collection("tramitacoesProposicao")
+                .document(String.valueOf(t.getSequencia())).set(t));
     }
 
     public List<Proposicao> getProposicoes() throws InterruptedException, ExecutionException {
