@@ -33,6 +33,7 @@ public class Despesa {
     private String valorGlosa;
     private String valorLiquido;
     private String estadoPolitico;
+    private String urlPartidoLogo;
 
     public void buildData() {
         DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
