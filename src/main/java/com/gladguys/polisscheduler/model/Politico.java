@@ -17,6 +17,7 @@ public class Politico {
 	private String sexo;
 	private String dataNascimento;
 	private String escolaridade;
+	private String urlPartidoLogo;
 
 	public Politico() {
 	}
