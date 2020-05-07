@@ -1,11 +1,8 @@
 package com.gladguys.polisscheduler.services;
 
 import com.gladguys.polisscheduler.builder.PoliticoBuilder;
-import com.gladguys.polisscheduler.model.Politico;
-import com.gladguys.polisscheduler.model.PoliticoCompleto;
-import com.gladguys.polisscheduler.model.PoliticoSimples;
-import com.gladguys.polisscheduler.model.RetornoApiPoliticosCompleto;
-import com.gladguys.polisscheduler.model.RetornoApiPoliticosSimples;
+import com.gladguys.polisscheduler.model.*;
+import com.gladguys.polisscheduler.services.firestore.FirestorePartidoService;
 import com.gladguys.polisscheduler.services.firestore.FirestorePoliticoService;
 
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -13,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PoliticosService {
@@ -22,12 +20,14 @@ public class PoliticosService {
 	private final RestTemplate restTemplate;
 	private final FirestoreService firestoreService;
 	private final FirestorePoliticoService firestorePoliticoService;
+	private final FirestorePartidoService firestorePartidoService;
 
 	public PoliticosService(RestTemplateBuilder restTemplateBuilder, FirestoreService firestoreService,
-			FirestorePoliticoService firestorePoliticoService) {
+							FirestorePoliticoService firestorePoliticoService, FirestorePartidoService firestorePartidoService) {
 		this.restTemplate = restTemplateBuilder.build();
 		this.firestoreService = firestoreService;
 		this.firestorePoliticoService = firestorePoliticoService;
+		this.firestorePartidoService = firestorePartidoService;
 	}
 
 	public void salvaPoliticos() {
@@ -41,6 +41,10 @@ public class PoliticosService {
 		PoliticoCompleto pCompleto = this.restTemplate.getForObject(ps.getUri(),
 				RetornoApiPoliticosCompleto.class).dados;
 		Politico politico = PoliticoBuilder.build(pCompleto);
+
+		var partidoOpt = firestorePartidoService.getById(politico.getSiglaPartido());
+		politico.setUrlPartidoLogo(partidoOpt.orElse(null).getLogo());
+
 		firestorePoliticoService.addPolitico(politico);
 	}
 }

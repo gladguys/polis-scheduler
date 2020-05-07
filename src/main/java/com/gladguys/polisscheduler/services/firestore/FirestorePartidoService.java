@@ -35,6 +35,7 @@ public class FirestorePartidoService {
                             .get(0);
 
             return Optional.of(partido.toObject(Partido.class));
+
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {

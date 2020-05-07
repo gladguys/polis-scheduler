@@ -11,6 +11,7 @@ public class Partido {
     String id;
     String nome;
     String sigla;
+    String logo;
 
     public Map parseToMap() {
         Map partidoMap = new HashMap();
