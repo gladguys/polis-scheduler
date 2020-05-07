@@ -42,4 +42,9 @@ public class FirestorePoliticoService {
 			db.collection("partidos").document(p.getId()).set(p);
 		});
 	}
+
+    public Politico getPoliticoById(String id) throws ExecutionException, InterruptedException {
+		ApiFuture<DocumentSnapshot> future = db.collection("politicos").document(id).get();
+		return future.get().toObject(Politico.class);
+	}
 }
