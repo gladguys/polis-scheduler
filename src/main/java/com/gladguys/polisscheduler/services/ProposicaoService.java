@@ -149,7 +149,7 @@ public class ProposicaoService {
     }
 
     private List<Tramitacao> getTramitacoes(Proposicao proposicao) {
-        return this.restTemplate.getForObject(URI_PROPOSICAO + "/" + proposicao.getId() + "/tramitacoes?dataFim=2019-04-11",
+        return this.restTemplate.getForObject(URI_PROPOSICAO + "/" + proposicao.getId() + "/tramitacoes?dataFim=" + DataUtil.getDataOntem(),
                 RetornoApiTramitacoes.class).dados;
 
     }
