@@ -19,6 +19,7 @@ public class FirestoreDespesaService {
     public void salvarDespesas(List<Despesa> despesas, String politicoId) {
 		try {
 			despesas.forEach(d -> {
+				System.out.println("ID POLITICO: " + d.getIdPolitico());
 				db.collection("atividades").document(politicoId).collection("atividadesPolitico")
 						.document(d.getDataDocumento().replace("-", "") + d.getIdPolitico()
 								+ d.getValorDocumento().replace(".", "") + d.getCodDocumento())

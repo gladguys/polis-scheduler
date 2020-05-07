@@ -42,6 +42,5 @@ public class PoliticosService {
 				RetornoApiPoliticosCompleto.class).dados;
 		Politico politico = PoliticoBuilder.build(pCompleto);
 		firestorePoliticoService.addPolitico(politico);
-
 	}
 }

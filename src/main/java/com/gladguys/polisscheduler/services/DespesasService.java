@@ -38,10 +38,10 @@ public class DespesasService {
         politicos.forEach(p -> {
             int numeroMes = DataUtil.getNumeroMes();
             //TODO: retirar 2020 chapado
-            String urlParaDespesasPolitico = URI_POLITICOS + p.getId() + "/despesas?ano=2020&mes=" + numeroMes
+            String urlParaDespesasPolitico = URI_POLITICOS + p.getId() + "/despesas?ano=2019&mes=" + 5
                     + "&ordem=ASC&ordenarPor=ano";
 
-            String urlParaDespesasPoliticoMesPassado;
+           /* String urlParaDespesasPoliticoMesPassado;
             if (numeroMes == 1) {
                 //TODO: retirar 2019 chapado
                 urlParaDespesasPoliticoMesPassado = URI_POLITICOS + p.getId()
@@ -50,15 +50,15 @@ public class DespesasService {
                 //TODO: retirar 2020 chapado
                 urlParaDespesasPoliticoMesPassado = URI_POLITICOS + p.getId() + "/despesas?ano=2020&mes="
                         + (numeroMes - 1) + "&ordem=ASC&ordenarPor=ano";
-            }
+            }*/
 
             List<Despesa> despesasDeHoje = this.restTemplate
                     .getForObject(urlParaDespesasPolitico, RetornoDespesas.class).getDados();
 
-            List<Despesa> despesasMesPassado = this.restTemplate
-                    .getForObject(urlParaDespesasPoliticoMesPassado, RetornoDespesas.class).getDados();
+           /* List<Despesa> despesasMesPassado = this.restTemplate
+                    .getForObject(urlParaDespesasPoliticoMesPassado, RetornoDespesas.class).getDados();*/
 
-            despesasDeHoje.addAll(despesasMesPassado);
+            //despesasDeHoje.addAll(despesasMesPassado);
 
             despesasDeHoje.forEach(d -> {
                 d.setIdPolitico(p.getId());
@@ -72,7 +72,7 @@ public class DespesasService {
             });
 
             firestoreService.salvarDespesas(
-                    despesasDeHoje.stream().filter(d -> d.getDataDocumento() != null).collect(Collectors.toList()),
+                    despesasDeHoje.stream().filter(d -> d.getDataDocumento() != null && (d.getDataDocumento().equals("2019-05-20") || d.getDataDocumento().equals("2019-05-21") || d.getDataDocumento().equals("2019-05-22") )).collect(Collectors.toList()),
                     p.getId());
         });
     }
