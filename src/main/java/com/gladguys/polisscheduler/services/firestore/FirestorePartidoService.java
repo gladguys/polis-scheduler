@@ -1,6 +1,9 @@
 package com.gladguys.polisscheduler.services.firestore;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import com.gladguys.polisscheduler.model.Partido;
 import com.google.cloud.firestore.Firestore;
 
@@ -17,7 +20,7 @@ public class FirestorePartidoService {
 
 	public void salvarPartidos(List<Partido> partidos) {
 		partidos.forEach(p -> {
-			db.collection("partidos").document(p.getId()).set(p);
+			db.collection("partidos").document(p.getId()).update(p.parseToMap());
 		});
 	}
 }
