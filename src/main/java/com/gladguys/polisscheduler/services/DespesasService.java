@@ -37,14 +37,17 @@ public class DespesasService {
         List<Politico> politicos = firestorePoliticoService.getPoliticos();
         politicos.forEach(p -> {
             int numeroMes = DataUtil.getNumeroMes();
+            //TODO: retirar 2020 chapado
             String urlParaDespesasPolitico = URI_POLITICOS + p.getId() + "/despesas?ano=2020&mes=" + numeroMes
                     + "&ordem=ASC&ordenarPor=ano";
 
             String urlParaDespesasPoliticoMesPassado;
             if (numeroMes == 1) {
+                //TODO: retirar 2019 chapado
                 urlParaDespesasPoliticoMesPassado = URI_POLITICOS + p.getId()
                         + "/despesas?ano=2019&mes=12&ordem=ASC&ordenarPor=ano";
             } else {
+                //TODO: retirar 2020 chapado
                 urlParaDespesasPoliticoMesPassado = URI_POLITICOS + p.getId() + "/despesas?ano=2020&mes="
                         + (numeroMes - 1) + "&ordem=ASC&ordenarPor=ano";
             }
