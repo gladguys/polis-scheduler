@@ -5,16 +5,7 @@ import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-import com.gladguys.polisscheduler.model.PoliticoCompleto;
-import com.gladguys.polisscheduler.model.Proposicao;
-import com.gladguys.polisscheduler.model.ProposicaoCompleto;
-import com.gladguys.polisscheduler.model.RetornoApiAutoresProposicao;
-import com.gladguys.polisscheduler.model.RetornoApiPoliticosCompleto;
-import com.gladguys.polisscheduler.model.RetornoApiProposicaoCompleto;
-import com.gladguys.polisscheduler.model.RetornoApiProposicoes;
-import com.gladguys.polisscheduler.model.RetornoApiSimples;
-import com.gladguys.polisscheduler.model.RetornoApiTramitacoes;
-import com.gladguys.polisscheduler.model.Tramitacao;
+import com.gladguys.polisscheduler.model.*;
 import com.gladguys.polisscheduler.services.firestore.FirestorePoliticoService;
 import com.gladguys.polisscheduler.services.firestore.FirestoreProposicaoService;
 import com.gladguys.polisscheduler.utils.DataUtil;
@@ -92,7 +83,9 @@ public class ProposicaoService {
                     if (politicoRetorno.getId() != null && politicosId.contains(politicoRetorno.getId())) {
 
                         Proposicao proposicao = proposicaoCompleto.build();
+                        setPartidoLogoParaProposicao(politicoRetorno, proposicao);
                         proposicao.configuraDadosPoliticoNaProposicao(politicoRetorno);
+
                         firestoreProposicaoService.salvarProposicao(proposicao);
 
                         List<Tramitacao> tramitacoes = getTramitacoes(proposicao);
@@ -106,6 +99,18 @@ public class ProposicaoService {
             throw e;
         }
         atualizaTramitacoes();
+    }
+
+    private void setPartidoLogoParaProposicao(PoliticoCompleto politicoRetorno, Proposicao proposicao) {
+        try {
+            Politico politicoProposicao =
+                    firestorePoliticoService.getPoliticoById(politicoRetorno.getId());
+            proposicao.setUrlPartidoLogo(politicoProposicao.getUrlPartidoLogo());
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     public void atualizaTramitacoes() {

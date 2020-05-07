@@ -25,6 +25,7 @@ public class Proposicao {
     private String estadoPolitico;
     private boolean foiAtualizada;
     private String dataAtualizacao;
+    private String urlPartidoLogo;
 
     public void configuraDadosPoliticoNaProposicao(PoliticoCompleto politicoRetorno) {
         this.setNomePolitico(politicoRetorno.getUltimoStatus().getNomeEleitoral());
@@ -33,5 +34,4 @@ public class Proposicao {
         this.setFotoPolitico(politicoRetorno.getUltimoStatus().getUrlFoto());
         this.setEstadoPolitico(politicoRetorno.getUltimoStatus().getSiglaUf());
     }
-
 }
