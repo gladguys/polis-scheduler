@@ -163,4 +163,8 @@ public class ProposicaoService {
         firestoreProposicaoService.deleteAllProposicoes();
     }
 
+    public void criarDummyProposicao() {
+
+        Proposicao proposicao = new Proposicao();
+    }
 }

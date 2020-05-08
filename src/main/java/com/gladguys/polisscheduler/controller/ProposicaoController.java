@@ -37,4 +37,14 @@ public class ProposicaoController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
 		}
 	}
+
+	@GetMapping(value = "/new-dummy")
+	public ResponseEntity<String> criarDummyProposicoes() {
+		try {
+			proposicaoService.criarDummyProposicao();
+			return ResponseEntity.ok("proposicao dummy criada com sucesso!");
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+		}
+	}
 }
