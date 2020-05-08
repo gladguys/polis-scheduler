@@ -166,7 +166,7 @@ public class ProposicaoService {
 
     public void criarDummyProposicao() {
 
-        Proposicao proposicao = new Proposicao();
+        var proposicao = new Proposicao();
         proposicao.setId(UUID.randomUUID().toString());
         proposicao.setSequencia(1);
         proposicao.setVisualizado(false);

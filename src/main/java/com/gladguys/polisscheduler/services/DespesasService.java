@@ -79,7 +79,7 @@ public class DespesasService {
 
     public String criarDespesaMock() {
 
-        Despesa despesa = new Despesa();
+        var despesa = new Despesa();
         despesa.setAno("2019");
         despesa.setCnpjCpfFornecedor("03482208000182");
         despesa.setCodDocumento("6821340");

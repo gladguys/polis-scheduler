@@ -20,9 +20,10 @@ public class FirestoreDespesaService {
     public void salvarDespesas(List<Despesa> despesas, String politicoId) {
 		try {
 			despesas.forEach(d -> {
-				db.collection("atividades").document(politicoId).collection("atividadesPolitico")
-						.document(d.getDataDocumento().replace("-", "") + d.getIdPolitico()
-								+ d.getValorDocumento().replace(".", "") + d.getCodDocumento())
+				db.collection("atividades")
+						.document(politicoId)
+						.collection("atividadesPolitico")
+						.document(montaIdDespesa(d))
 						.create(d);
 			});
 		} catch (Exception e) {
@@ -31,10 +32,17 @@ public class FirestoreDespesaService {
 	}
 
 	public String salvarDespesa(Despesa despesa) {
-		String despesaId = UUID.randomUUID().toString();
-
-		db.collection("atividades").document(despesa.getIdPolitico()).collection("atividadesPolitico")
-				.document(despesaId).create(despesa);
+		var despesaId = UUID.randomUUID().toString();
+		db.collection("atividades")
+				.document(despesa.getIdPolitico())
+				.collection("atividadesPolitico")
+				.document(despesaId)
+				.create(despesa);
 		return despesaId;
+	}
+
+	private String montaIdDespesa(Despesa d) {
+		return d.getDataDocumento().replace("-", "") + d.getIdPolitico()
+				+ d.getValorDocumento().replace(".", "") + d.getCodDocumento();
 	}
 }
