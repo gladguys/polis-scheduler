@@ -147,6 +147,7 @@ public class ProposicaoService {
 
     private void atualizarProposicaoComNovasTramitacoes(Proposicao proposicao) {
         proposicao.setFoiAtualizada(true);
+        proposicao.setVisualizado(false);
         // TODO: pegar data ou da ultima tramitacao ou de agora
         proposicao.setDataAtualizacao("2020-01-01");
 
@@ -156,7 +157,6 @@ public class ProposicaoService {
     private List<Tramitacao> getTramitacoes(Proposicao proposicao) {
         return this.restTemplate.getForObject(URI_PROPOSICAO + "/" + proposicao.getId() + "/tramitacoes?dataFim=" + DataUtil.getDataOntem(),
                 RetornoApiTramitacoes.class).dados;
-
     }
 
     public void deletaProposicoes() {
