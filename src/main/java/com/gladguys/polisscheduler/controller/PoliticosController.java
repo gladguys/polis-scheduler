@@ -40,11 +40,11 @@ public class PoliticosController {
 		}
 	}
 
-	@GetMapping(value = "/despesa-mock")
+	@GetMapping(value = "/despesa-dummy")
 	public ResponseEntity<String> criarDespesaMock() {
 		try {
 			String idDespesaMock = despesasService.criarDespesaMock();
-			return ResponseEntity.ok("Despesas "+ idDespesaMock +"mock criada com sucesso!");
+			return ResponseEntity.ok("Despesa Dummy com id "+ idDespesaMock +" criada com sucesso!");
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
 		}
