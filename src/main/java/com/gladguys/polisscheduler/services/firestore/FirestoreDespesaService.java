@@ -1,6 +1,7 @@
 package com.gladguys.polisscheduler.services.firestore;
 
 import java.util.List;
+import java.util.UUID;
 
 import com.gladguys.polisscheduler.model.Despesa;
 import com.google.cloud.firestore.Firestore;
@@ -27,5 +28,13 @@ public class FirestoreDespesaService {
 		} catch (Exception e) {
 			System.err.println(e);
 		}
+	}
+
+	public String salvarDespesa(Despesa despesa) {
+		String despesaId = UUID.randomUUID().toString();
+
+		db.collection("atividades").document(despesa.getIdPolitico()).collection("atividadesPolitico")
+				.document(despesaId).create(despesa);
+		return despesaId;
 	}
 }
