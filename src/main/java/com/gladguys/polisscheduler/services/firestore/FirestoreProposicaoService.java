@@ -44,7 +44,7 @@ public class FirestoreProposicaoService {
 
         db.collection("tramitacoes").document(id).delete();
 
-        tramitacoes.forEach(t ->
+        tramitacoes.parallelStream().forEach(t ->
                 db.collection("tramitacoes")
                         .document(id)
                         .collection("tramitacoesProposicao")

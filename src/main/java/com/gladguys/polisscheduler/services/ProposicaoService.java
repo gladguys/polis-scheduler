@@ -1,5 +1,7 @@
 package com.gladguys.polisscheduler.services;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -39,7 +41,7 @@ public class ProposicaoService {
         List<String> politicosId =
                 firestorePoliticoService
                         .getPoliticos()
-                        .stream()
+                        .parallelStream()
                         .map(p -> p.getId())
                         .collect(Collectors.toList());
 
@@ -63,7 +65,7 @@ public class ProposicaoService {
         }
 
         try {
-            retSimplesProposicoes.stream().forEach(prop -> {
+            retSimplesProposicoes.parallelStream().forEach(prop -> {
                 var proposicaoCompleto = Objects.requireNonNull(this.restTemplate.getForObject(prop.getUri(),
                         RetornoApiProposicaoCompleto.class)).dados;
                 List<RetornoApiSimples> autores = this.restTemplate
@@ -151,11 +153,11 @@ public class ProposicaoService {
     private void atualizarProposicaoComNovasTramitacoes(Proposicao proposicao, Tramitacao ultimoTramite) {
         proposicao.setFoiAtualizada(true);
         proposicao.setVisualizado(false);
+        proposicao.setDescricaoSituacao(ultimoTramite.getDescricaoSituacao());
         proposicao.setDespacho(ultimoTramite.getDespacho());
         proposicao.setDescricaoTramitacao(ultimoTramite.getDescricaoTramitacao());
         proposicao.setSequencia(ultimoTramite.getSequencia());
-        // TODO: pegar data ou da ultima tramitacao ou de agora
-        proposicao.setDataAtualizacao("2020-01-01");
+        proposicao.setDataAtualizacao(ultimoTramite.getDataHora());
 
         firestoreProposicaoService.salvarProposicao(proposicao);
     }
