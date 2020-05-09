@@ -1,8 +1,6 @@
 package com.gladguys.polisscheduler.services;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -129,9 +127,10 @@ public class ProposicaoService {
                     if (tramitacoesNovas.size() > 0
                             && tramitacoesNovas.size() > quantidadeTramitacoesAtual) {
 
+                        var ultimoTramite = Collections.max(tramitacoesNovas, Comparator.comparing(Tramitacao::getSequencia));
                         firestoreProposicaoService.salvarTramitacoesProposicao(tramitacoesNovas,
                                 p.getId());
-                        atualizarProposicaoComNovasTramitacoes(p);
+                        atualizarProposicaoComNovasTramitacoes(p,ultimoTramite);
 
                     }
 
@@ -145,10 +144,12 @@ public class ProposicaoService {
         }
     }
 
-    private void atualizarProposicaoComNovasTramitacoes(Proposicao proposicao) {
+    private void atualizarProposicaoComNovasTramitacoes(Proposicao proposicao, Tramitacao ultimoTramite) {
         proposicao.setFoiAtualizada(true);
         proposicao.setVisualizado(false);
-        proposicao.setSequencia(proposicao.getSequencia() + 1);
+        proposicao.setDespacho(ultimoTramite.getDespacho());
+        proposicao.setDescricaoTramitacao(ultimoTramite.getDescricaoTramitacao());
+        proposicao.setSequencia(ultimoTramite.getSequencia());
         // TODO: pegar data ou da ultima tramitacao ou de agora
         proposicao.setDataAtualizacao("2020-01-01");
 
