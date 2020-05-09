@@ -162,7 +162,7 @@ public class ProposicaoService {
     }
 
     public void deletaProposicoes() throws ExecutionException, InterruptedException {
-        firestoreProposicaoService.deleteTodasProposicoes();
+        firestoreProposicaoService.deletarTodasProposicoes();
     }
 
     public void criarDummyProposicao() {
@@ -185,7 +185,7 @@ public class ProposicaoService {
     }
 
     public void deletarTodasProposicoes() throws ExecutionException, InterruptedException {
-        firestoreProposicaoService.deleteTodasProposicoes();
+        firestoreProposicaoService.deletarTodasProposicoes();
         firestorePoliticoService.limparTotalizadorProposicoesPoliticos();
     }
 }

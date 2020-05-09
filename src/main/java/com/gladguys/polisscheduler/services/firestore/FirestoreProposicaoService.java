@@ -33,7 +33,7 @@ public class FirestoreProposicaoService {
                 .document(proposicao.getId()).set(proposicao);
     }
 
-    public void deleteTodasProposicoes() throws ExecutionException, InterruptedException {
+    public void deletarTodasProposicoes() throws ExecutionException, InterruptedException {
         List<String> politicosId = firestorePoliticoService.getPoliticos().stream().map(p -> p.getId())
                 .collect(Collectors.toList());
         politicosId.forEach(p -> deletarProposicoesPorPoliticoId(p));

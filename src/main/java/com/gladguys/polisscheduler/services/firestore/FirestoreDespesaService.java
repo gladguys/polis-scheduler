@@ -45,7 +45,7 @@ public class FirestoreDespesaService {
         return despesaId;
     }
 
-    public void deleteTodasDespesas() throws ExecutionException, InterruptedException {
+    public void deletarTodasDespesas() throws ExecutionException, InterruptedException {
         List<String> politicosId = firestorePoliticoService.getPoliticos().stream().map(p -> p.getId())
                 .collect(Collectors.toList());
         politicosId.forEach(politicoId -> deletarDespesasPorPoliticoId(politicoId));
