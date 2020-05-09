@@ -1,6 +1,5 @@
 package com.gladguys.polisscheduler.services;
 
-import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -8,6 +7,7 @@ import java.util.stream.Collectors;
 import com.gladguys.polisscheduler.model.Despesa;
 import com.gladguys.polisscheduler.model.Politico;
 import com.gladguys.polisscheduler.model.RetornoDespesas;
+import com.gladguys.polisscheduler.model.TipoAtividade;
 import com.gladguys.polisscheduler.services.firestore.FirestoreDespesaService;
 import com.gladguys.polisscheduler.services.firestore.FirestorePoliticoService;
 import com.gladguys.polisscheduler.utils.DataUtil;
@@ -77,4 +77,28 @@ public class DespesasService {
         });
     }
 
+    public String criarDespesaMock() {
+
+        var despesa = new Despesa();
+        despesa.setAno("2019");
+        despesa.setCnpjCpfFornecedor("03482208000182");
+        despesa.setCodDocumento("6821340");
+        despesa.setDataDocumento("2019-05-06");
+        despesa.setEstadoPolitico("RN");
+        despesa.setFotoPolitico("https://www.camara.leg.br/internet/deputado/bandep/109429.jpg");
+        despesa.setIdPolitico("109429");
+        despesa.setMes("5");
+        despesa.setNomeFornecedor("AUTO POSTO JK LTDA");
+        despesa.setNomePolitico("Benes Leocádio");
+        despesa.setSiglaPartido("REPUBLICANOS");
+        despesa.setTipoAtividade(TipoAtividade.DESPESA);
+        despesa.setTipoDespesa("COMBUSTÍVEIS E LUBRIFICANTES.");
+        despesa.setTipoDocumento("Nota Fiscal Eletrônica");
+        despesa.setUrlDocumento("http://camara.leg.br/cota-parlamentar/nota-fiscal-eletronica?ideDocumentoFiscal=6821340");
+        despesa.setValorDocumento("231.42");
+        despesa.setValorGlosa("0.0");
+        despesa.setValorLiquido("200.42");
+
+        return firestoreService.salvarDespesa(despesa);
+    }
 }

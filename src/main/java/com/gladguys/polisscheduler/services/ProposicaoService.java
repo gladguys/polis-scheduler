@@ -2,6 +2,7 @@ package com.gladguys.polisscheduler.services;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -116,7 +117,6 @@ public class ProposicaoService {
     public void atualizaTramitacoes() {
         try {
             List<Proposicao> proposicoesNoFirestore = firestoreProposicaoService.getProposicoes();
-            proposicoesNoFirestore.forEach(p -> System.out.println(p.getDataApresentacao()));
 
             proposicoesNoFirestore.forEach(p -> {
                 try {
@@ -148,6 +148,7 @@ public class ProposicaoService {
     private void atualizarProposicaoComNovasTramitacoes(Proposicao proposicao) {
         proposicao.setFoiAtualizada(true);
         proposicao.setVisualizado(false);
+        proposicao.setSequencia(proposicao.getSequencia() + 1);
         // TODO: pegar data ou da ultima tramitacao ou de agora
         proposicao.setDataAtualizacao("2020-01-01");
 
@@ -163,4 +164,22 @@ public class ProposicaoService {
         firestoreProposicaoService.deleteAllProposicoes();
     }
 
+    public void criarDummyProposicao() {
+
+        var proposicao = new Proposicao();
+        proposicao.setId(UUID.randomUUID().toString());
+        proposicao.setSequencia(1);
+        proposicao.setVisualizado(false);
+        proposicao.setFoiAtualizada(false);
+        proposicao.setIdPoliticoAutor("109429");
+        proposicao.setNomePolitico("Benes Leocádio");
+        proposicao.setEmenta("Uma proposicao dummy criada para teste");
+        proposicao.setFotoPolitico("https://www.camara.leg.br/internet/deputado/bandep/109429.jpg");
+        proposicao.setDataApresentacao("2019-01-01");
+        proposicao.setDataAtualizacao("2019-01-01");
+        proposicao.setEstadoPolitico("RN");
+        proposicao.setSiglaPartido("REPUBLICANOS");
+
+        firestoreProposicaoService.salvarProposicao(proposicao);
+    }
 }
