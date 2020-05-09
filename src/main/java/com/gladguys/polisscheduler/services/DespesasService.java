@@ -77,6 +77,10 @@ public class DespesasService {
         });
     }
 
+    public void deletarTodasDespesas() throws ExecutionException, InterruptedException {
+        this.firestoreService.deleteTodasDespesas();
+    }
+
     public String criarDespesaMock() {
 
         var despesa = new Despesa();

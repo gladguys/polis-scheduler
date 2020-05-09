@@ -50,4 +50,14 @@ public class PoliticosController {
 		}
 	}
 
+	@GetMapping(value = "/despesas/delete-all")
+	public ResponseEntity<String> deletarDespesas() {
+		try {
+			this.despesasService.deletarTodasDespesas();
+			return ResponseEntity.ok("todas desepsas deletadas com sucesso");
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+		}
+	}
+
 }

@@ -1,7 +1,9 @@
 package com.gladguys.polisscheduler.services.firestore;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import com.gladguys.polisscheduler.model.Partido;
@@ -46,5 +48,28 @@ public class FirestorePoliticoService {
     public Politico getPoliticoById(String id) throws ExecutionException, InterruptedException {
 		ApiFuture<DocumentSnapshot> future = db.collection("politicos").document(id).get();
 		return future.get().toObject(Politico.class);
+	}
+
+	public void limparTotalizadorProposicoesPoliticos() {
+		QuerySnapshot politicos = null;
+		try {
+			politicos = db.collection("politicos").get().get();
+			politicos.forEach(p -> zeraTotalProposicoes(p.getId()));
+
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void zeraTotalProposicoes(String id) {
+		db.collection("politicos").document(id).update(proposizaoZeradaMap());
+	}
+
+	private Map<String, Object> proposizaoZeradaMap() {
+		var propZeradaMap = new HashMap<String, Object>();
+		propZeradaMap.put("totalProposicoes", 0);
+		return propZeradaMap;
 	}
 }
