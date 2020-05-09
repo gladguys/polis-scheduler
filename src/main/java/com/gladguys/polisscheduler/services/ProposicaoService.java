@@ -87,7 +87,7 @@ public class ProposicaoService {
 
                         firestoreProposicaoService.salvarProposicao(proposicao);
 
-                        List<Tramitacao> tramitacoes = getTramitacoes(proposicao);
+                        List<Tramitacao> tramitacoes = getTramitacoesDaAPI(proposicao);
                         firestoreProposicaoService.salvarTramitacoesProposicao(tramitacoes,
                                 proposicao.getId());
                     }
@@ -115,33 +115,37 @@ public class ProposicaoService {
     public void atualizaTramitacoes() {
         try {
             List<Proposicao> proposicoesNoFirestore = firestoreProposicaoService.getProposicoes();
+            proposicoesNoFirestore.forEach(p -> atualizaTramitacao(p));
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+    }
 
-            proposicoesNoFirestore.forEach(p -> {
-                try {
-                    List<Tramitacao> tramitacoesNovas = getTramitacoes(p);
-                    int quantidadeTramitacoesAtual;
+    private void atualizaTramitacao(Proposicao proposicao) {
+        try {
+            List<Tramitacao> tramitacoesNovas = getTramitacoesDaAPI(proposicao);
 
-                    quantidadeTramitacoesAtual = firestoreProposicaoService
-                            .getQuantidadeTramitacoes(p.getId());
+            int quantidadeTramitacoesAtual = firestoreProposicaoService
+                    .getQuantidadeTramitacoes(proposicao.getId());
 
-                    if (tramitacoesNovas.size() > 0
-                            && tramitacoesNovas.size() > quantidadeTramitacoesAtual) {
+            if (haAtualizacaoDeTramitacoes(tramitacoesNovas, quantidadeTramitacoesAtual)) {
+                var tramiteNovoMaisRecente =
+                        Collections.max(tramitacoesNovas, Comparator.comparing(Tramitacao::getSequencia));
 
-                        var ultimoTramite = Collections.max(tramitacoesNovas, Comparator.comparing(Tramitacao::getSequencia));
-                        firestoreProposicaoService.salvarTramitacoesProposicao(tramitacoesNovas,
-                                p.getId());
-                        atualizarProposicaoComNovasTramitacoes(p,ultimoTramite);
+                firestoreProposicaoService.salvarTramitacoesProposicao(tramitacoesNovas,
+                        proposicao.getId());
+                atualizarProposicaoComNovasTramitacoes(proposicao, tramiteNovoMaisRecente);
 
-                    }
-
-                } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
-                }
-            });
+            }
 
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
+    }
+
+    private boolean haAtualizacaoDeTramitacoes(List<Tramitacao> tramitacoesNovas, int quantidadeTramitacoesAtual) {
+        return tramitacoesNovas.size() > 0
+                && tramitacoesNovas.size() > quantidadeTramitacoesAtual;
     }
 
     private void atualizarProposicaoComNovasTramitacoes(Proposicao proposicao, Tramitacao ultimoTramite) {
@@ -156,7 +160,7 @@ public class ProposicaoService {
         firestoreProposicaoService.salvarProposicao(proposicao);
     }
 
-    private List<Tramitacao> getTramitacoes(Proposicao proposicao) {
+    private List<Tramitacao> getTramitacoesDaAPI(Proposicao proposicao) {
         return this.restTemplate.getForObject(URI_PROPOSICAO + "/" + proposicao.getId() + "/tramitacoes?dataFim=" + DataUtil.getDataOntem(),
                 RetornoApiTramitacoes.class).dados;
     }
