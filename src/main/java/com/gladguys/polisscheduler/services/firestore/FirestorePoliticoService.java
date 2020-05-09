@@ -21,55 +21,63 @@ public class FirestorePoliticoService {
 
     private final Firestore db;
 
-	public FirestorePoliticoService(Firestore firestore) {
-		this.db = firestore;
-	}
+    public FirestorePoliticoService(Firestore firestore) {
+        this.db = firestore;
+    }
 
-	public void addPolitico(Politico politico) {
-		db.collection("politicos").document(politico.getId()).set(politico);
-	}
+    public void addPolitico(Politico politico) {
+        db.collection("politicos").document(politico.getId()).set(politico);
+    }
 
-	public List<Politico> getPoliticos() throws InterruptedException, ExecutionException {
-		List<Politico> politicos = new ArrayList<>();
-		ApiFuture<QuerySnapshot> future = db.collection("politicos").get();
-		List<QueryDocumentSnapshot> documents = future.get().getDocuments();
-		for (DocumentSnapshot document : documents) {
-			politicos.add(document.toObject(Politico.class));
-		}
-		return politicos;
-	}
+    public List<Politico> getPoliticos() throws InterruptedException, ExecutionException {
+        List<Politico> politicos = new ArrayList<>();
+        ApiFuture<QuerySnapshot> future = db.collection("politicos").get();
+        List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+        for (DocumentSnapshot document : documents) {
+            politicos.add(document.toObject(Politico.class));
+        }
+        return politicos;
+    }
 
-	public void salvarPartidos(List<Partido> partidos) {
-		partidos.forEach(p -> {
-			db.collection("partidos").document(p.getId()).set(p);
-		});
-	}
+    public void salvarPartidos(List<Partido> partidos) {
+        partidos.forEach(p -> {
+            db.collection("partidos").document(p.getId()).set(p);
+        });
+    }
 
     public Politico getPoliticoById(String id) throws ExecutionException, InterruptedException {
-		ApiFuture<DocumentSnapshot> future = db.collection("politicos").document(id).get();
-		return future.get().toObject(Politico.class);
-	}
+        ApiFuture<DocumentSnapshot> future = db.collection("politicos").document(id).get();
+        return future.get().toObject(Politico.class);
+    }
 
-	public void limparTotalizadorProposicoesPoliticos() {
-		QuerySnapshot politicos = null;
-		try {
-			politicos = db.collection("politicos").get().get();
-			politicos.forEach(p -> zeraTotalProposicoes(p.getId()));
+    public void limparTotalizadorProposicoesPoliticos() {
+        zeradorCampoEmDocumentoPolitico("totalProposicoes");
+    }
 
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			e.printStackTrace();
-		}
-	}
+    public void zerarTotalizadorDespesas() {
+        zeradorCampoEmDocumentoPolitico("totalDespesas");
+    }
 
-	private void zeraTotalProposicoes(String id) {
-		db.collection("politicos").document(id).update(proposizaoZeradaMap());
-	}
+    private void zeradorCampoEmDocumentoPolitico(String campo) {
+        QuerySnapshot politicos = null;
+        try {
+            politicos = db.collection("politicos").get().get();
+            politicos.forEach(p -> zeraTotalizador(p.getId(), campo));
 
-	private Map<String, Object> proposizaoZeradaMap() {
-		var propZeradaMap = new HashMap<String, Object>();
-		propZeradaMap.put("totalProposicoes", 0);
-		return propZeradaMap;
-	}
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void zeraTotalizador(String id, String nomeCampo) {
+        db.collection("politicos").document(id).update(campoZeradoMap(nomeCampo));
+    }
+
+    private Map<String, Object> campoZeradoMap(String campo) {
+        var propZeradaMap = new HashMap<String, Object>();
+        propZeradaMap.put(campo, 0);
+        return propZeradaMap;
+    }
 }
