@@ -64,7 +64,7 @@ public class ProposicaoService {
 
         try {
             retSimplesProposicoes.stream().forEach(prop -> {
-                ProposicaoCompleto proposicaoCompleto = Objects.requireNonNull(this.restTemplate.getForObject(prop.getUri(),
+                var proposicaoCompleto = Objects.requireNonNull(this.restTemplate.getForObject(prop.getUri(),
                         RetornoApiProposicaoCompleto.class)).dados;
                 List<RetornoApiSimples> autores = this.restTemplate
                         .getForObject(proposicaoCompleto.getUriAutores(),
@@ -75,19 +75,19 @@ public class ProposicaoService {
                     retPolitico = autores.get(0);
                 }
                 if (retPolitico != null && retPolitico.getUri() != null && retPolitico.getUri() != "") {
-                    PoliticoCompleto politicoRetorno =
+                    var politicoRetorno =
                             Objects.requireNonNull(this.restTemplate.getForObject(
                                     retPolitico.getUri(), RetornoApiPoliticosCompleto.class)).dados;
 
                     if (politicoRetorno.getId() != null && politicosId.contains(politicoRetorno.getId())) {
 
-                        Proposicao proposicao = proposicaoCompleto.build();
+                        var proposicao = proposicaoCompleto.build();
                         setPartidoLogoParaProposicao(politicoRetorno, proposicao);
                         proposicao.configuraDadosPoliticoNaProposicao(politicoRetorno);
 
                         firestoreProposicaoService.salvarProposicao(proposicao);
 
-                        List<Tramitacao> tramitacoes = getTramitacoesDaAPI(proposicao);
+                        var tramitacoes = getTramitacoesDaAPI(proposicao);
                         firestoreProposicaoService.salvarTramitacoesProposicao(tramitacoes,
                                 proposicao.getId());
                     }
@@ -102,7 +102,7 @@ public class ProposicaoService {
 
     private void setPartidoLogoParaProposicao(PoliticoCompleto politicoRetorno, Proposicao proposicao) {
         try {
-            Politico politicoProposicao =
+            var politicoProposicao =
                     firestorePoliticoService.getPoliticoById(politicoRetorno.getId());
             proposicao.setUrlPartidoLogo(politicoProposicao.getUrlPartidoLogo());
         } catch (ExecutionException e) {
