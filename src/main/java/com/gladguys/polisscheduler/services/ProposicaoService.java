@@ -90,6 +90,9 @@ public class ProposicaoService {
                         firestoreProposicaoService.salvarProposicao(proposicao);
 
                         var tramitacoes = getTramitacoesDaAPI(proposicao);
+                        proposicao.atualizaDadosUltimaTramitacao(
+                                Collections.max(tramitacoes, Comparator.comparing(Tramitacao::getSequencia)));
+
                         firestoreProposicaoService.salvarTramitacoesProposicao(tramitacoes,
                                 proposicao.getId());
                     }
