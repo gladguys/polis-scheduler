@@ -26,6 +26,7 @@ public class Proposicao {
     private boolean foiAtualizada;
     private String dataAtualizacao;
     private String urlPartidoLogo;
+    private boolean visualizado;
 
     public void configuraDadosPoliticoNaProposicao(PoliticoCompleto politicoRetorno) {
         this.setNomePolitico(politicoRetorno.getUltimoStatus().getNomeEleitoral());
