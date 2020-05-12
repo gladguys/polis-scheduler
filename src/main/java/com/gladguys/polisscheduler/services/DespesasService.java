@@ -35,10 +35,10 @@ public class DespesasService {
     // @Scheduled(cron = "0 48 05 * * ?")
     public void salvarDespesasDoDia() throws InterruptedException, ExecutionException {
         List<Politico> politicos = firestorePoliticoService.getPoliticos();
-        politicos.forEach(p -> {
-            int numeroMes = DataUtil.getNumeroMes();
+        politicos.parallelStream().forEach(p -> {
+            int numeroMes = 12;
             //TODO: retirar 2020 chapado
-            String urlParaDespesasPolitico = URI_POLITICOS + p.getId() + "/despesas?ano=2020&mes=" + numeroMes
+            String urlParaDespesasPolitico = URI_POLITICOS + p.getId() + "/despesas?ano=2019&mes=" + numeroMes
                     + "&ordem=ASC&ordenarPor=ano";
 
             String urlParaDespesasPoliticoMesPassado;
@@ -48,7 +48,7 @@ public class DespesasService {
                         + "/despesas?ano=2019&mes=12&ordem=ASC&ordenarPor=ano";
             } else {
                 //TODO: retirar 2020 chapado
-                urlParaDespesasPoliticoMesPassado = URI_POLITICOS + p.getId() + "/despesas?ano=2020&mes="
+                urlParaDespesasPoliticoMesPassado = URI_POLITICOS + p.getId() + "/despesas?ano=2019&mes="
                         + (numeroMes - 1) + "&ordem=ASC&ordenarPor=ano";
             }
 

@@ -36,8 +36,13 @@ public class ProposicaoService {
     }
 
     // @Scheduled(cron = "0 48 05 * * ?")
-    public void salvarProposicoes() throws InterruptedException, ExecutionException {
+    public void salvarProposicoes(String data) throws InterruptedException, ExecutionException {
 
+        salvarProposicoesNoFirestore(data);
+        //atualizaTramitacoes(data);
+    }
+
+    private void salvarProposicoesNoFirestore(String data) throws InterruptedException, ExecutionException {
         List<String> politicosId =
                 firestorePoliticoService
                         .getPoliticos()
@@ -45,8 +50,8 @@ public class ProposicaoService {
                         .map(p -> p.getId())
                         .collect(Collectors.toList());
 
-        String urlProposicoes = URI_PROPOSICAO + "?dataApresentacaoInicio=" + DataUtil.getDataOntem()
-                + "&dataApresentacaoFim=" + DataUtil.getDataOntem() + "&itens=100000";
+        String urlProposicoes = URI_PROPOSICAO + "?dataApresentacaoInicio=" + data
+                + "&dataApresentacaoFim=" + data + "&itens=100000";
 
         RetornoApiProposicoes retornoApiProposicoes =
                 this.restTemplate.getForObject(urlProposicoes, RetornoApiProposicoes.class);
@@ -55,8 +60,8 @@ public class ProposicaoService {
 
         int pagina = 2;
         while (retornoApiProposicoes.temMaisPaginasComConteudo()) {
-            urlProposicoes = URI_PROPOSICAO + "?dataApresentacaoInicio=" + DataUtil.getDataOntem()
-                    + "&dataApresentacaoFim=" + DataUtil.getDataOntem() + "&pagina=" + pagina
+            urlProposicoes = URI_PROPOSICAO + "?dataApresentacaoInicio=" + data
+                    + "&dataApresentacaoFim=" + data + "&pagina=" + pagina
                     + "&itens=100000";
             retornoApiProposicoes = this.restTemplate.getForObject(urlProposicoes,
                     RetornoApiProposicoes.class);
@@ -66,6 +71,7 @@ public class ProposicaoService {
 
         try {
             retSimplesProposicoes.parallelStream().forEach(prop -> {
+                System.out.println("Começando com proposicao " + prop.getUri() + " ...");
                 var proposicaoCompleto = Objects.requireNonNull(this.restTemplate.getForObject(prop.getUri(),
                         RetornoApiProposicaoCompleto.class)).dados;
                 List<RetornoApiSimples> autores = this.restTemplate
@@ -86,15 +92,20 @@ public class ProposicaoService {
                         var proposicao = proposicaoCompleto.build();
                         setPartidoLogoParaProposicao(politicoRetorno, proposicao);
                         proposicao.configuraDadosPoliticoNaProposicao(politicoRetorno);
-
+                        System.out.println("salvando proposicao " + proposicao.getId());
                         firestoreProposicaoService.salvarProposicao(proposicao);
+                        System.out.println("proposicao  " + proposicao.getId() + " foi salva");
 
-                        var tramitacoes = getTramitacoesDaAPI(proposicao);
-                        proposicao.atualizaDadosUltimaTramitacao(
-                                Collections.max(tramitacoes, Comparator.comparing(Tramitacao::getSequencia)));
+                        var tramitacoes = getTramitacoesDaAPI(proposicao, data);
+                        if (tramitacoes.size() > 0) {
+                            proposicao.atualizaDadosUltimaTramitacao(
+                                    Collections.max(tramitacoes, Comparator.comparing(Tramitacao::getSequencia)));
+                            System.out.println("tramitacoes a salvar da proposicao " + proposicao.getId());
+                            firestoreProposicaoService.salvarTramitacoesProposicao(tramitacoes,
+                                    proposicao.getId());
+                            System.out.println("tramitacoes foram salvas");
+                        }
 
-                        firestoreProposicaoService.salvarTramitacoesProposicao(tramitacoes,
-                                proposicao.getId());
                     }
                 }
             });
@@ -102,7 +113,6 @@ public class ProposicaoService {
             System.err.println(e);
             throw e;
         }
-        atualizaTramitacoes();
     }
 
     private void setPartidoLogoParaProposicao(PoliticoCompleto politicoRetorno, Proposicao proposicao) {
@@ -117,18 +127,18 @@ public class ProposicaoService {
         }
     }
 
-    public void atualizaTramitacoes() {
+    public void atualizaTramitacoes(String data) {
         try {
             List<Proposicao> proposicoesNoFirestore = firestoreProposicaoService.getProposicoes();
-            proposicoesNoFirestore.forEach(p -> atualizaTramitacao(p));
+            proposicoesNoFirestore.forEach(p -> atualizaTramitacao(p, data));
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
     }
 
-    private void atualizaTramitacao(Proposicao proposicao) {
+    private void atualizaTramitacao(Proposicao proposicao, String data) {
         try {
-            List<Tramitacao> tramitacoesNovas = getTramitacoesDaAPI(proposicao);
+            List<Tramitacao> tramitacoesNovas = getTramitacoesDaAPI(proposicao, data);
 
             int quantidadeTramitacoesAtual = firestoreProposicaoService
                     .getQuantidadeTramitacoes(proposicao.getId());
@@ -165,8 +175,9 @@ public class ProposicaoService {
         firestoreProposicaoService.salvarProposicao(proposicao);
     }
 
-    private List<Tramitacao> getTramitacoesDaAPI(Proposicao proposicao) {
-        return this.restTemplate.getForObject(URI_PROPOSICAO + "/" + proposicao.getId() + "/tramitacoes?dataFim=" + DataUtil.getDataOntem(),
+    private List<Tramitacao> getTramitacoesDaAPI(Proposicao proposicao, String data) {
+        return this.restTemplate.getForObject(
+                URI_PROPOSICAO + "/" + proposicao.getId() + "/tramitacoes?dataFim=" + data,
                 RetornoApiTramitacoes.class).dados;
     }
 
@@ -185,8 +196,8 @@ public class ProposicaoService {
         proposicao.setNomePolitico("Benes Leocádio");
         proposicao.setEmenta("Uma proposicao dummy criada para teste");
         proposicao.setFotoPolitico("https://www.camara.leg.br/internet/deputado/bandep/109429.jpg");
-        proposicao.setDataApresentacao("2019-01-01");
-        proposicao.setDataAtualizacao("2019-01-01");
+        //proposicao.setDataApresentacao(data);
+        //proposicao.setDataAtualizacao(data);
         proposicao.setEstadoPolitico("RN");
         proposicao.setSiglaPartido("REPUBLICANOS");
 
