@@ -35,4 +35,10 @@ public class Proposicao {
         this.setFotoPolitico(politicoRetorno.getUltimoStatus().getUrlFoto());
         this.setEstadoPolitico(politicoRetorno.getUltimoStatus().getSiglaUf());
     }
+
+    public void atualizaDadosUltimaTramitacao(Tramitacao tramitacao) {
+        this.sequencia = tramitacao.getSequencia();
+        this.descricaoTramitacao = tramitacao.getDescricaoTramitacao();
+        this.despacho = tramitacao.getDespacho();
+    }
 }
