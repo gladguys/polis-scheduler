@@ -36,19 +36,19 @@ public class DespesasService {
     public void salvarDespesasDoDia() throws InterruptedException, ExecutionException {
         List<Politico> politicos = firestorePoliticoService.getPoliticos();
         politicos.parallelStream().forEach(p -> {
-            int numeroMes = 12;
+            int numeroMes = 5;
             //TODO: retirar 2020 chapado
-            String urlParaDespesasPolitico = URI_POLITICOS + p.getId() + "/despesas?ano=2019&mes=" + numeroMes
+            String urlParaDespesasPolitico = URI_POLITICOS + p.getId() + "/despesas?ano=2020&mes=" + numeroMes
                     + "&ordem=ASC&ordenarPor=ano";
 
             String urlParaDespesasPoliticoMesPassado;
             if (numeroMes == 1) {
-                //TODO: retirar 2019 chapado
+                //TODO: retirar 2020 chapado
                 urlParaDespesasPoliticoMesPassado = URI_POLITICOS + p.getId()
-                        + "/despesas?ano=2019&mes=12&ordem=ASC&ordenarPor=ano";
+                        + "/despesas?ano=2020&mes=12&ordem=ASC&ordenarPor=ano";
             } else {
                 //TODO: retirar 2020 chapado
-                urlParaDespesasPoliticoMesPassado = URI_POLITICOS + p.getId() + "/despesas?ano=2019&mes="
+                urlParaDespesasPoliticoMesPassado = URI_POLITICOS + p.getId() + "/despesas?ano=2020&mes="
                         + (numeroMes - 1) + "&ordem=ASC&ordenarPor=ano";
             }
 
@@ -78,17 +78,17 @@ public class DespesasService {
     }
 
     public void deletarTodasDespesas() throws ExecutionException, InterruptedException {
-        this.firestoreService.deletarTodasDespesas();
+ //       this.firestoreService.deletarTodasDespesas();
         this.firestorePoliticoService.zerarTotalizadorDespesas();
     }
 
     public String criarDespesaMock() {
 
         var despesa = new Despesa();
-        despesa.setAno("2019");
+        despesa.setAno("2020");
         despesa.setCnpjCpfFornecedor("03482208000182");
         despesa.setCodDocumento("6821340");
-        despesa.setDataDocumento("2019-05-06");
+        despesa.setDataDocumento("2020-05-06");
         despesa.setEstadoPolitico("RN");
         despesa.setFotoPolitico("https://www.camara.leg.br/internet/deputado/bandep/109429.jpg");
         despesa.setIdPolitico("109429");

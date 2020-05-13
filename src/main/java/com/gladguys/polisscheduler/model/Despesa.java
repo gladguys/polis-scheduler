@@ -21,6 +21,7 @@ public class Despesa {
     private String codLote;
     private String codTipoDocumento;
     private String dataDocumento;
+    private String dataAtualizacao;
     private String mes;
     private String nomeFornecedor;
     private String numDocumento;
@@ -47,7 +48,7 @@ public class Despesa {
                 e.printStackTrace();
             }
 
-            this.dataDocumento = new SimpleDateFormat("yyyy-MM-dd").format(dataDocumentoString).toString();
+            this.dataAtualizacao = new SimpleDateFormat("yyyy-MM-dd").format(dataDocumentoString).toString();
         }
     }
 }

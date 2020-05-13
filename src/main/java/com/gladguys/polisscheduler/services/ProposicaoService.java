@@ -38,8 +38,8 @@ public class ProposicaoService {
     // @Scheduled(cron = "0 48 05 * * ?")
     public void salvarProposicoes(String data) throws InterruptedException, ExecutionException {
 
-        salvarProposicoesNoFirestore(data);
-        //atualizaTramitacoes(data);
+        //salvarProposicoesNoFirestore(data);
+        atualizaTramitacoes(data);
     }
 
     private void salvarProposicoesNoFirestore(String data) throws InterruptedException, ExecutionException {
@@ -93,8 +93,6 @@ public class ProposicaoService {
                         setPartidoLogoParaProposicao(politicoRetorno, proposicao);
                         proposicao.configuraDadosPoliticoNaProposicao(politicoRetorno);
                         System.out.println("salvando proposicao " + proposicao.getId());
-                        firestoreProposicaoService.salvarProposicao(proposicao);
-                        System.out.println("proposicao  " + proposicao.getId() + " foi salva");
 
                         var tramitacoes = getTramitacoesDaAPI(proposicao, data);
                         if (tramitacoes.size() > 0) {
@@ -105,6 +103,9 @@ public class ProposicaoService {
                                     proposicao.getId());
                             System.out.println("tramitacoes foram salvas");
                         }
+
+                        firestoreProposicaoService.salvarProposicao(proposicao);
+                        System.out.println("proposicao  " + proposicao.getId() + " foi salva");
 
                     }
                 }
