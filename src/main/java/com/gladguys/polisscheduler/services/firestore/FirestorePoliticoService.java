@@ -1,5 +1,6 @@
 package com.gladguys.polisscheduler.services.firestore;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,10 +10,7 @@ import java.util.concurrent.ExecutionException;
 import com.gladguys.polisscheduler.model.Partido;
 import com.gladguys.polisscheduler.model.Politico;
 import com.google.api.core.ApiFuture;
-import com.google.cloud.firestore.DocumentSnapshot;
-import com.google.cloud.firestore.Firestore;
-import com.google.cloud.firestore.QueryDocumentSnapshot;
-import com.google.cloud.firestore.QuerySnapshot;
+import com.google.cloud.firestore.*;
 
 import org.springframework.stereotype.Service;
 
@@ -79,5 +77,11 @@ public class FirestorePoliticoService {
         var propZeradaMap = new HashMap<String, Object>();
         propZeradaMap.put(campo, 0);
         return propZeradaMap;
+    }
+
+    public void atualizarTotalizadorDespesaPolitico(String politicoId, BigDecimal valorAIncrementar) {
+        db.collection("politicos")
+                .document(politicoId)
+                .update("totalDespesas", FieldValue.increment(valorAIncrementar.doubleValue()));
     }
 }

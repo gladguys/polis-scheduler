@@ -90,7 +90,7 @@ public class DespesasService {
 
         //pega todos os deputados da base
         List<Politico> politicos = firestorePoliticoService.getPoliticos();
-        politicos.parallelStream().forEach(politico -> {
+        politicos.stream().forEach(politico -> {
             String urlParaDespesasPolitico = URI_POLITICOS + politico.getId() + "/despesas?ano=" + ano + "&mes=" + mes
                     + "&pagina=1&itens=100000000&ordem=ASC&ordenarPor=ano";
 
@@ -102,12 +102,13 @@ public class DespesasService {
                     .reduce((v1, v2) -> v1.add(v2));
 
             firestoreService.salvarTotalDespesaPoliticoPorMes(politico.getId(), mes, valorMes.orElse(new BigDecimal(0.0)));
+            firestorePoliticoService.atualizarTotalizadorDespesaPolitico(politico.getId(),valorMes.orElse(new BigDecimal(0.0)));
 
         });
     }
 
     public void deletarTodasDespesas() throws ExecutionException, InterruptedException {
-        this.firestoreService.deletarTodasDespesas();
+  //      this.firestoreService.deletarTodasDespesas();
         this.firestorePoliticoService.zerarTotalizadorDespesas();
     }
 
