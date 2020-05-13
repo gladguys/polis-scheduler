@@ -9,8 +9,10 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 @Service
 public class PoliticosService {
@@ -46,5 +48,14 @@ public class PoliticosService {
 		politico.setUrlPartidoLogo(partidoOpt.orElse(null).getLogo());
 
 		firestorePoliticoService.addPolitico(politico);
+	}
+
+    public void atualizarRankingDespesas() throws ExecutionException, InterruptedException {
+		List<Politico> politicos = this.firestorePoliticoService.getPoliticos();
+		politicos.sort(Comparator.comparing(p -> p.getTotalDespesas()));
+
+		for (int pos = politicos.size(); pos >= 1; pos--) {
+			firestorePoliticoService.atualizarPosicaoRankingDespesaPolitico(politicos.get(pos-1).getId(), pos);
+		}
 	}
 }
