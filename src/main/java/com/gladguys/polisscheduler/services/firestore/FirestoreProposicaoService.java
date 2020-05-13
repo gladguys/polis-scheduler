@@ -33,29 +33,18 @@ public class FirestoreProposicaoService {
                 .document(proposicao.getId()).set(proposicao);
     }
 
-    public void deleteAllProposicoes() {
+    public void deletarTodasProposicoes() throws ExecutionException, InterruptedException {
+        List<String> politicosId = firestorePoliticoService.getPoliticos().stream().map(p -> p.getId())
+                .collect(Collectors.toList());
+        politicosId.forEach(p -> deletarProposicoesPorPoliticoId(p));
 
-        try {
-            List<String> politicosId = firestorePoliticoService.getPoliticos().stream().map(p -> p.getId())
-                    .collect(Collectors.toList());
-            politicosId.forEach(p -> {
-
-                db.collection("atividades")
-                        .document(p)
-                        .collection("atividadesPolitico")
-                        .listDocuments()
-                        .forEach(d -> d.delete());
-            });
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
     }
 
     public void salvarTramitacoesProposicao(List<Tramitacao> tramitacoes, String id) {
 
         db.collection("tramitacoes").document(id).delete();
 
-        tramitacoes.forEach(t ->
+        tramitacoes.parallelStream().forEach(t ->
                 db.collection("tramitacoes")
                         .document(id)
                         .collection("tramitacoesProposicao")
@@ -85,7 +74,11 @@ public class FirestoreProposicaoService {
 
     public int getQuantidadeTramitacoes(String proposicaoId) throws InterruptedException, ExecutionException {
 
-        return db.collection("tramitacoes").document(proposicaoId).collection("tramitacoesProposicao").get().get()
+        return db.collection("tramitacoes")
+                .document(proposicaoId)
+                .collection("tramitacoesProposicao")
+                .get()
+                .get()
                 .getDocuments().size();
     }
 
@@ -106,6 +99,28 @@ public class FirestoreProposicaoService {
             proposicoesPolitico.add(document.toObject(Proposicao.class));
         }
         return proposicoesPolitico;
+    }
+
+    private void deletarProposicoesPorPoliticoId(String p) {
+        QuerySnapshot queryDocumentSnapshots = null;
+        try {
+            queryDocumentSnapshots = db.collection("atividades")
+                    .document(p)
+                    .collection("atividadesPolitico")
+                    .whereEqualTo("tipoAtividade", "PROPOSICAO")
+                    .get()
+                    .get();
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        if (queryDocumentSnapshots.getDocuments().size() > 0) {
+            queryDocumentSnapshots.forEach(prop2Delete -> {
+                db.collection("atividades").document(prop2Delete.getId()).delete();
+            });
+        }
     }
 
 }

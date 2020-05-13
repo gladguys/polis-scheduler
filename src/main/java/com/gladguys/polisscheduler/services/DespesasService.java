@@ -99,6 +99,11 @@ public class DespesasService {
         });
         //get despesas por ano e mes para cada deputado
 
+
+    public void deletarTodasDespesas() throws ExecutionException, InterruptedException {
+        this.firestoreService.deletarTodasDespesas();
+        this.firestorePoliticoService.zerarTotalizadorDespesas();
+
     }
 
     public String criarDespesaMock() {
