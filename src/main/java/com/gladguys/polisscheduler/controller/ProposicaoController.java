@@ -28,16 +28,6 @@ public class ProposicaoController {
 		}
 	}
 
-	@GetMapping(value = "/deletaTodas")
-	public ResponseEntity<String> deletaProposicoes() {
-		try {
-			proposicaoService.deletaProposicoes();
-			return ResponseEntity.ok("Todas Proposicoes deletadas com sucesso!");
-		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-		}
-	}
-
 	@GetMapping(value = "/new-dummy")
 	public ResponseEntity<String> criarDummyProposicoes() {
 		try {
@@ -47,4 +37,15 @@ public class ProposicaoController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
 		}
 	}
+
+	@GetMapping(value = "/deleteall")
+	public ResponseEntity<String> deleteAll() {
+		try {
+			proposicaoService.deletarTodasProposicoes();
+			return ResponseEntity.ok("proposicoes deletadas com sucesso");
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+		}
+	}
+
 }

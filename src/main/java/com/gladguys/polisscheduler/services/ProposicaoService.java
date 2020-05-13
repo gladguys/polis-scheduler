@@ -161,8 +161,8 @@ public class ProposicaoService {
                 RetornoApiTramitacoes.class).dados;
     }
 
-    public void deletaProposicoes() {
-        firestoreProposicaoService.deleteAllProposicoes();
+    public void deletaProposicoes() throws ExecutionException, InterruptedException {
+        firestoreProposicaoService.deletarTodasProposicoes();
     }
 
     public void criarDummyProposicao() {
@@ -182,5 +182,10 @@ public class ProposicaoService {
         proposicao.setSiglaPartido("REPUBLICANOS");
 
         firestoreProposicaoService.salvarProposicao(proposicao);
+    }
+
+    public void deletarTodasProposicoes() throws ExecutionException, InterruptedException {
+        firestoreProposicaoService.deletarTodasProposicoes();
+        firestorePoliticoService.limparTotalizadorProposicoesPoliticos();
     }
 }
