@@ -1,6 +1,8 @@
 package com.gladguys.polisscheduler.services;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -75,6 +77,28 @@ public class DespesasService {
                     despesasDeHoje.stream().filter(d -> d.getDataDocumento() != null).collect(Collectors.toList()),
                     p.getId());
         });
+    }
+
+    public void totalizadorDespesasPorAnoEmes(String ano, String mes) throws ExecutionException, InterruptedException {
+
+        //pega todos os deputados da base
+        List<Politico> politicos = firestorePoliticoService.getPoliticos();
+        politicos.parallelStream().forEach(politico -> {
+            String urlParaDespesasPolitico = URI_POLITICOS + politico.getId() + "/despesas?ano="+ano+"&mes=" + mes
+                    + "&pagina=1&itens=100000000&ordem=ASC&ordenarPor=ano";
+
+            List<Despesa> despesas = this.restTemplate
+                    .getForObject(urlParaDespesasPolitico, RetornoDespesas.class).getDados();
+
+            Optional<BigDecimal> valorMes = despesas.parallelStream()
+                    .map(d -> new BigDecimal(d.getValorLiquido()))
+                    .reduce((v1, v2) -> v1.add(v2));
+
+            firestoreService.salvarTotalDespesaPoliticoPorMes(politico.getId(),mes,valorMes.orElse(new BigDecimal(0.0)));
+
+        });
+        //get despesas por ano e mes para cada deputado
+
     }
 
     public String criarDespesaMock() {
