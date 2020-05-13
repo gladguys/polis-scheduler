@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.concurrent.ExecutionException;
+
 @RestController
 @RequestMapping(value = "/politicos")
 public class PoliticosController {
@@ -62,4 +64,13 @@ public class PoliticosController {
 		}
 	}
 
+	@GetMapping(value = "/ranking-despesas")
+	public ResponseEntity<String> atualizaRankingDespesa() throws ExecutionException, InterruptedException {
+		try {
+			this.politicosService.atualizarRankingDespesas();
+			return ResponseEntity.ok("ranking atualizado");
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+		}
+	}
 }

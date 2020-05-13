@@ -31,9 +31,11 @@ public class FirestorePoliticoService {
         List<Politico> politicos = new ArrayList<>();
         ApiFuture<QuerySnapshot> future = db.collection("politicos").get();
         List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+
         for (DocumentSnapshot document : documents) {
             politicos.add(document.toObject(Politico.class));
         }
+        System.out.println("quantidade politicos: " + politicos.size());;
         return politicos;
     }
 
@@ -83,5 +85,13 @@ public class FirestorePoliticoService {
         db.collection("politicos")
                 .document(politicoId)
                 .update("totalDespesas", FieldValue.increment(valorAIncrementar.doubleValue()));
+    }
+
+    public void atualizarPosicaoRankingDespesaPolitico(String politicoId, int pos) {
+        ApiFuture<WriteResult> update = db.collection("politicos")
+                .document(politicoId)
+                .update("rankingPosDespesa", pos);
+        while(!update.isDone()){
+        }
     }
 }
