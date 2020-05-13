@@ -101,7 +101,7 @@ public class DespesasService {
                     .map(d -> new BigDecimal(d.getValorLiquido()))
                     .reduce((v1, v2) -> v1.add(v2));
 
-            firestoreService.salvarTotalDespesaPoliticoPorMes(politico.getId(), mes, valorMes.orElse(new BigDecimal(0.0)));
+            firestoreService.salvarTotalDespesaPoliticoPorMes(politico.getId(),ano, mes, valorMes.orElse(new BigDecimal(0.0)));
             firestorePoliticoService.atualizarTotalizadorDespesaPolitico(politico.getId(),valorMes.orElse(new BigDecimal(0.0)));
 
         });

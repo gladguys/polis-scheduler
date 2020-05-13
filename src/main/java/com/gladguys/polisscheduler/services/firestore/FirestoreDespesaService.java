@@ -75,12 +75,14 @@ public class FirestoreDespesaService {
     }
 
 
-    public void salvarTotalDespesaPoliticoPorMes(String id, String mes, BigDecimal totalDespesas) {
+    public void salvarTotalDespesaPoliticoPorMes(String id, String ano , String mes, BigDecimal totalDespesas) {
         Map<String, Object> mesValor = new HashMap<>();
         mesValor.put("total", totalDespesas.doubleValue());
         db.collection("totalizador_despesas")
                 .document(id)
-                .collection("totalPorMes")
+                .collection("totaisAno")
+                .document(ano)
+                .collection("totalMes")
                 .document(mes)
                 .set(mesValor);
     }
