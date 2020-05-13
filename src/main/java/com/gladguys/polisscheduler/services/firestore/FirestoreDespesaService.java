@@ -1,6 +1,9 @@
 package com.gladguys.polisscheduler.services.firestore;
 
+import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -19,6 +22,7 @@ public class FirestoreDespesaService {
     public FirestoreDespesaService(Firestore firestore, FirestorePoliticoService firestorePoliticoService) {
         this.db = firestore;
         this.firestorePoliticoService = firestorePoliticoService;
+
     }
 
     public void salvarDespesas(List<Despesa> despesas, String politicoId) {
@@ -68,5 +72,16 @@ public class FirestoreDespesaService {
     private String montaIdDespesa(Despesa d) {
         return d.getDataDocumento().replace("-", "") + d.getIdPolitico()
                 + d.getValorDocumento().replace(".", "") + d.getCodDocumento();
+    }
+
+
+    public void salvarTotalDespesaPoliticoPorMes(String id, String mes, BigDecimal totalDespesas) {
+        Map<String, Object> mesValor = new HashMap<>();
+        mesValor.put("total", totalDespesas.doubleValue());
+        db.collection("totalizador_despesas")
+                .document(id)
+                .collection("totalPorMes")
+                .document(mes)
+                .set(mesValor);
     }
 }
