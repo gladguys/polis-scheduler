@@ -22,36 +22,43 @@ import org.springframework.web.client.RestTemplate;
 public class DespesasService {
 
     private static final String URI_POLITICOS = "https://dadosabertos.camara.leg.br/api/v2/deputados/";
-
     private final RestTemplate restTemplate;
     private final FirestoreDespesaService firestoreService;
     private final FirestorePoliticoService firestorePoliticoService;
 
     public DespesasService(RestTemplateBuilder restTemplateBuilder, FirestoreDespesaService firestoreService,
-            FirestorePoliticoService firestorePoliticoService) {
+                           FirestorePoliticoService firestorePoliticoService) {
         this.restTemplate = restTemplateBuilder.build();
         this.firestoreService = firestoreService;
         this.firestorePoliticoService = firestorePoliticoService;
     }
 
-    // @Scheduled(cron = "0 48 05 * * ?")
-    public void salvarDespesasDoDia() throws InterruptedException, ExecutionException {
+    public void salvarDespesasMesAtualEAnterior(Integer mes, Integer ano) throws InterruptedException, ExecutionException {
         List<Politico> politicos = firestorePoliticoService.getPoliticos();
         politicos.parallelStream().forEach(p -> {
-            int numeroMes = 5;
-            //TODO: retirar 2020 chapado
-            String urlParaDespesasPolitico = URI_POLITICOS + p.getId() + "/despesas?ano=2020&mes=" + numeroMes
-                    + "&ordem=ASC&ordenarPor=ano";
+            int numeroMes = mes != null ? mes : DataUtil.getNumeroMes();
+            int numeroAno = ano != null ? ano : DataUtil.getNumeroAno();
+
+            String urlParaDespesasPolitico =
+                    URI_POLITICOS + p.getId() +
+                            "/despesas?ano=" +
+                            numeroAno +
+                            "&mes=" +
+                            numeroMes +
+                            "&ordem=ASC&ordenarPor=ano";
 
             String urlParaDespesasPoliticoMesPassado;
             if (numeroMes == 1) {
-                //TODO: retirar 2020 chapado
-                urlParaDespesasPoliticoMesPassado = URI_POLITICOS + p.getId()
-                        + "/despesas?ano=2020&mes=12&ordem=ASC&ordenarPor=ano";
+                urlParaDespesasPoliticoMesPassado =
+                        URI_POLITICOS +
+                                p.getId() +
+                                "/despesas?ano="+numeroAno+"&mes=12&ordem=ASC&ordenarPor=ano";
             } else {
-                //TODO: retirar 2020 chapado
-                urlParaDespesasPoliticoMesPassado = URI_POLITICOS + p.getId() + "/despesas?ano=2020&mes="
-                        + (numeroMes - 1) + "&ordem=ASC&ordenarPor=ano";
+                urlParaDespesasPoliticoMesPassado =
+                        URI_POLITICOS +
+                                p.getId() +
+                                "/despesas?ano="+numeroAno+"&mes=" +
+                                (numeroMes - 1) + "&ordem=ASC&ordenarPor=ano";
             }
 
             List<Despesa> despesasDeHoje = this.restTemplate
@@ -84,7 +91,7 @@ public class DespesasService {
         //pega todos os deputados da base
         List<Politico> politicos = firestorePoliticoService.getPoliticos();
         politicos.parallelStream().forEach(politico -> {
-            String urlParaDespesasPolitico = URI_POLITICOS + politico.getId() + "/despesas?ano="+ano+"&mes=" + mes
+            String urlParaDespesasPolitico = URI_POLITICOS + politico.getId() + "/despesas?ano=" + ano + "&mes=" + mes
                     + "&pagina=1&itens=100000000&ordem=ASC&ordenarPor=ano";
 
             List<Despesa> despesas = this.restTemplate
@@ -94,20 +101,17 @@ public class DespesasService {
                     .map(d -> new BigDecimal(d.getValorLiquido()))
                     .reduce((v1, v2) -> v1.add(v2));
 
-            firestoreService.salvarTotalDespesaPoliticoPorMes(politico.getId(),mes,valorMes.orElse(new BigDecimal(0.0)));
+            firestoreService.salvarTotalDespesaPoliticoPorMes(politico.getId(), mes, valorMes.orElse(new BigDecimal(0.0)));
 
         });
-        //get despesas por ano e mes para cada deputado
-
+    }
 
     public void deletarTodasDespesas() throws ExecutionException, InterruptedException {
- //       this.firestoreService.deletarTodasDespesas();
+        this.firestoreService.deletarTodasDespesas();
         this.firestorePoliticoService.zerarTotalizadorDespesas();
-
     }
 
     public String criarDespesaMock() {
-
         var despesa = new Despesa();
         despesa.setAno("2020");
         despesa.setCnpjCpfFornecedor("03482208000182");

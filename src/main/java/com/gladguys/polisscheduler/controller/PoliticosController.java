@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -31,9 +32,10 @@ public class PoliticosController {
 	}
 
 	@GetMapping(value = "/despesas")
-	public ResponseEntity<String> getDespesas() {
+	public ResponseEntity<String> getDespesas(@RequestParam(value = "mes", required = false) Integer mes,
+											  @RequestParam(value = "ano", required = false) Integer ano) {
 		try {
-			despesasService.salvarDespesasDoDia();
+			despesasService.salvarDespesasMesAtualEAnterior(mes, ano);
 			return ResponseEntity.ok("Despesas salvas com sucesso!");
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());

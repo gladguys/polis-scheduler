@@ -35,10 +35,11 @@ public class ProposicaoService {
         this.firestoreService = firestoreService;
     }
 
-    // @Scheduled(cron = "0 48 05 * * ?")
     public void salvarProposicoes(String data) throws InterruptedException, ExecutionException {
-
-        //salvarProposicoesNoFirestore(data);
+        if (data == null) {
+            data = DataUtil.getDataOntem();
+        }
+        salvarProposicoesNoFirestore(data);
         atualizaTramitacoes(data);
     }
 

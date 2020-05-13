@@ -4,10 +4,9 @@ import com.gladguys.polisscheduler.services.ProposicaoService;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.ws.rs.QueryParam;
 
 @RestController
 @RequestMapping(value = "/proposicoes")
@@ -19,8 +18,8 @@ public class ProposicaoController {
 		this.proposicaoService = proposicaoService;
 	}
 
-	@GetMapping(value = "/{data}")
-	public ResponseEntity<String> salvaProposicoes(@PathVariable("data") String data) {
+	@GetMapping
+	public ResponseEntity<String> salvaProposicoes(@RequestParam(value = "data", required = false) String data) {
 		try {
 			proposicaoService.salvarProposicoes(data);
 			return ResponseEntity.ok("Proposicoes salvas com sucesso!");
@@ -39,7 +38,7 @@ public class ProposicaoController {
 		}
 	}
 
-	@GetMapping(value = "/deleteall")
+	@GetMapping(value = "/delete-all")
 	public ResponseEntity<String> deleteAll() {
 		try {
 			proposicaoService.deletarTodasProposicoes();

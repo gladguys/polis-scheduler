@@ -21,4 +21,10 @@ public class DataUtil {
     public static String getDataOntem() {
         return LocalDate.now().minusDays(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")).toString();
     }
+
+    public static int getNumeroAno() {
+        Date date = new Date();
+        LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        return localDate.getYear();
+    }
 }
