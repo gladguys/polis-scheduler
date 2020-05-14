@@ -108,8 +108,8 @@ public class DespesasService {
     }
 
     public void deletarTodasDespesas() throws ExecutionException, InterruptedException {
-  //      this.firestoreService.deletarTodasDespesas();
-        this.firestorePoliticoService.zerarTotalizadorDespesas();
+        this.firestoreService.deletarTodasDespesas();
+        //this.firestorePoliticoService.zerarTotalizadorDespesas();
     }
 
     public String criarDespesaMock() {

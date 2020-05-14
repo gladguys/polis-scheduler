@@ -39,7 +39,7 @@ public class ProposicaoService {
         if (data == null) {
             data = DataUtil.getDataOntem();
         }
-        salvarProposicoesNoFirestore(data);
+        //salvarProposicoesNoFirestore(data);
         atualizaTramitacoes(data);
     }
 
@@ -73,48 +73,64 @@ public class ProposicaoService {
         try {
             retSimplesProposicoes.parallelStream().forEach(prop -> {
                 System.out.println("Começando com proposicao " + prop.getUri() + " ...");
-                var proposicaoCompleto = Objects.requireNonNull(this.restTemplate.getForObject(prop.getUri(),
-                        RetornoApiProposicaoCompleto.class)).dados;
-                List<RetornoApiSimples> autores = this.restTemplate
-                        .getForObject(proposicaoCompleto.getUriAutores(),
-                                RetornoApiAutoresProposicao.class)
-                        .getDados();
-                RetornoApiSimples retPolitico = null;
-                if (autores.size() > 0) {
-                    retPolitico = autores.get(0);
-                }
-                if (retPolitico != null && retPolitico.getUri() != null && retPolitico.getUri() != "") {
-                    var politicoRetorno =
-                            Objects.requireNonNull(this.restTemplate.getForObject(
-                                    retPolitico.getUri(), RetornoApiPoliticosCompleto.class)).dados;
 
-                    if (politicoRetorno.getId() != null && politicosId.contains(politicoRetorno.getId())) {
+                var proposicaoCompleto =
+                        Objects.requireNonNull(
+                                this.restTemplate.getForObject(prop.getUri(), RetornoApiProposicaoCompleto.class)).dados;
 
-                        var proposicao = proposicaoCompleto.build();
-                        setPartidoLogoParaProposicao(politicoRetorno, proposicao);
-                        proposicao.configuraDadosPoliticoNaProposicao(politicoRetorno);
-                        System.out.println("salvando proposicao " + proposicao.getId());
+                if (temTipoDescricaoValido(proposicaoCompleto)) {
+                    var autores = this.restTemplate
+                            .getForObject(proposicaoCompleto.getUriAutores(), RetornoApiAutoresProposicao.class).getDados();
 
-                        var tramitacoes = getTramitacoesDaAPI(proposicao, data);
-                        if (tramitacoes.size() > 0) {
-                            proposicao.atualizaDadosUltimaTramitacao(
-                                    Collections.max(tramitacoes, Comparator.comparing(Tramitacao::getSequencia)));
-                            System.out.println("tramitacoes a salvar da proposicao " + proposicao.getId());
-                            firestoreProposicaoService.salvarTramitacoesProposicao(tramitacoes,
-                                    proposicao.getId());
-                            System.out.println("tramitacoes foram salvas");
+                    RetornoApiSimples retPolitico = null;
+                    if (autores.size() > 0) {
+                        retPolitico = autores.get(0);
+                    }
+                    if (retPolitico != null && retPolitico.getUri() != null && retPolitico.getUri() != "") {
+                        var politicoRetorno =
+                                Objects.requireNonNull(this.restTemplate.getForObject(
+                                        retPolitico.getUri(), RetornoApiPoliticosCompleto.class)).dados;
+
+                        if (politicoRetorno.getId() != null && politicosId.contains(politicoRetorno.getId())) {
+
+                            var proposicao = proposicaoCompleto.build();
+                            setPartidoLogoParaProposicao(politicoRetorno, proposicao);
+                            proposicao.configuraDadosPoliticoNaProposicao(politicoRetorno);
+                            System.out.println("salvando proposicao " + proposicao.getId());
+
+                            var tramitacoes = getTramitacoesDaAPI(proposicao, data);
+                            if (tramitacoes.size() > 0) {
+                                proposicao.atualizaDadosUltimaTramitacao(
+                                        Collections.max(tramitacoes, Comparator.comparing(Tramitacao::getSequencia)));
+                                System.out.println("tramitacoes a salvar da proposicao " + proposicao.getId());
+                                firestoreProposicaoService.salvarTramitacoesProposicao(tramitacoes,
+                                        proposicao.getId());
+                                System.out.println("tramitacoes foram salvas");
+                            }
+
+                            firestoreProposicaoService.salvarProposicao(proposicao);
+                            System.out.println("proposicao  " + proposicao.getId() + " foi salva");
+
                         }
-
-                        firestoreProposicaoService.salvarProposicao(proposicao);
-                        System.out.println("proposicao  " + proposicao.getId() + " foi salva");
-
                     }
                 }
+
+
             });
         } catch (Exception e) {
             System.err.println(e);
             throw e;
         }
+    }
+
+    private boolean temTipoDescricaoValido(ProposicaoCompleto proposicaoCompleto) {
+        var descricaoTipo = proposicaoCompleto.getDescricaoTipo();
+        if (descricaoTipo.equals("Projeto de Lei") ||
+                descricaoTipo.equals("Indicação") ||
+                descricaoTipo.startsWith("Requerimento")) {
+            return true;
+        }
+        return false;
     }
 
     private void setPartidoLogoParaProposicao(PoliticoCompleto politicoRetorno, Proposicao proposicao) {

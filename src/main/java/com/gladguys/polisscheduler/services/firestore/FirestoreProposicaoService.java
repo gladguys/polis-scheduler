@@ -9,10 +9,7 @@ import com.gladguys.polisscheduler.model.Politico;
 import com.gladguys.polisscheduler.model.Proposicao;
 import com.gladguys.polisscheduler.model.Tramitacao;
 import com.google.api.core.ApiFuture;
-import com.google.cloud.firestore.DocumentSnapshot;
-import com.google.cloud.firestore.Firestore;
-import com.google.cloud.firestore.QueryDocumentSnapshot;
-import com.google.cloud.firestore.QuerySnapshot;
+import com.google.cloud.firestore.*;
 
 import org.springframework.stereotype.Service;
 
@@ -117,8 +114,8 @@ public class FirestoreProposicaoService {
             e.printStackTrace();
         }
         if (queryDocumentSnapshots.getDocuments().size() > 0) {
-            queryDocumentSnapshots.forEach(prop2Delete -> {
-                db.collection("atividades").document(prop2Delete.getId()).delete();
+            queryDocumentSnapshots.getDocuments().parallelStream().forEach(document -> {
+                document.getReference().delete();
             });
         }
     }

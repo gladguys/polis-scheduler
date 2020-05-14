@@ -9,8 +9,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import com.gladguys.polisscheduler.model.Despesa;
+import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.Firestore;
 
+import com.google.cloud.firestore.QuerySnapshot;
+import com.google.cloud.firestore.WriteResult;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -56,16 +59,24 @@ public class FirestoreDespesaService {
     }
 
     private void deletarDespesasPorPoliticoId(String politicoId) {
+        QuerySnapshot queryDocumentSnapshots = null;
         try {
-            db.collection("atividades")
+            queryDocumentSnapshots = db.collection("atividades")
                     .document(politicoId)
                     .collection("atividadesPolitico")
                     .whereEqualTo("tipoAtividade", "DESPESA")
-                    .get().get().iterator().remove();
+                    .get()
+                    .get();
+
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
             e.printStackTrace();
+        }
+        if (queryDocumentSnapshots.getDocuments().size() > 0) {
+            queryDocumentSnapshots.getDocuments().parallelStream().forEach(qd -> {
+                qd.getReference().delete();
+            });
         }
     }
 
