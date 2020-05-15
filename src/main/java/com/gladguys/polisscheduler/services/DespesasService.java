@@ -40,25 +40,16 @@ public class DespesasService {
             int numeroAno = ano != null ? ano : DataUtil.getNumeroAno();
 
             String urlParaDespesasPolitico =
-                    URI_POLITICOS + p.getId() +
-                            "/despesas?ano=" +
-                            numeroAno +
-                            "&mes=" +
-                            numeroMes +
-                            "&ordem=ASC&ordenarPor=ano";
+                    URI_POLITICOS + p.getId() + "/despesas?ano=" + numeroAno + "&mes=" + numeroMes + "&ordem=ASC&ordenarPor=ano";
 
             String urlParaDespesasPoliticoMesPassado;
             if (numeroMes == 1) {
                 urlParaDespesasPoliticoMesPassado =
-                        URI_POLITICOS +
-                                p.getId() +
-                                "/despesas?ano="+numeroAno+"&mes=12&ordem=ASC&ordenarPor=ano";
+                        URI_POLITICOS + p.getId() + "/despesas?ano="+numeroAno+"&mes=12&ordem=ASC&ordenarPor=ano";
             } else {
                 urlParaDespesasPoliticoMesPassado =
                         URI_POLITICOS +
-                                p.getId() +
-                                "/despesas?ano="+numeroAno+"&mes=" +
-                                (numeroMes - 1) + "&ordem=ASC&ordenarPor=ano";
+                                p.getId() + "/despesas?ano="+numeroAno+"&mes=" + (numeroMes - 1) + "&ordem=ASC&ordenarPor=ano";
             }
 
             List<Despesa> despesasDeHoje = this.restTemplate
