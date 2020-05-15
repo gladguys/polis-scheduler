@@ -38,8 +38,6 @@ public class ProposicaoController {
 		}
 	}
 
-
-
 	@GetMapping(value = "/new-dummy")
 	public ResponseEntity<String> criarDummyProposicoes() {
 		try {
