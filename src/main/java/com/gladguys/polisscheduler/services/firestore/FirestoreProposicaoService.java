@@ -31,10 +31,15 @@ public class FirestoreProposicaoService {
         this.firestorePoliticoService = firestorePoliticoService;
     }
 
-    public void salvarProposicao(Proposicao proposicao) {
+    public Proposicao salvarProposicao(Proposicao proposicao) {
 
-        db.collection(ATIVIDADES).document(proposicao.getIdPoliticoAutor()).collection(ATIVIDADES_POLITICO)
-                .document(proposicao.getId()).set(proposicao);
+        try {
+            db.collection(ATIVIDADES).document(proposicao.getIdPoliticoAutor()).collection(ATIVIDADES_POLITICO)
+                    .document(proposicao.getId()).set(proposicao);
+            return proposicao;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public void deletarTodasProposicoes() throws ExecutionException, InterruptedException {

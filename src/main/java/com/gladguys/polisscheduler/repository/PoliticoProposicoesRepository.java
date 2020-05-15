@@ -2,6 +2,7 @@ package com.gladguys.polisscheduler.repository;
 
 import com.gladguys.polisscheduler.model.PoliticoProposicao;
 import com.gladguys.polisscheduler.model.PoliticoProposicaoRowMapper;
+import com.gladguys.polisscheduler.model.Proposicao;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -21,8 +22,9 @@ public class PoliticoProposicoesRepository {
         this.template = template;
     }
 
-    public int inserirRelacaoPoliticoProposicao(String politicoId, String proposicaoId, String dataAtualizacao) {
-        return template.update(INSERT_QUERY, politicoId, proposicaoId, dataAtualizacao);
+    public int inserirRelacaoPoliticoProposicao(Proposicao proposicao) {
+        if (proposicao == null) return -1;
+        return template.update(INSERT_QUERY, proposicao.getIdPoliticoAutor(), proposicao.getId(), proposicao.getDataAtualizacao());
     }
 
     public List<PoliticoProposicao> getTodos() {

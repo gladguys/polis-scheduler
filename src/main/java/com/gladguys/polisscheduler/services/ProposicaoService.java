@@ -51,71 +51,95 @@ public class ProposicaoService {
         salvarProposicoesPorData(data);
     }
 
+    public void deletaProposicoes() throws ExecutionException, InterruptedException {
+        firestoreProposicaoService.deletarTodasProposicoes();
+    }
+
+    public void criarDummyProposicao() {
+
+        var proposicao = new Proposicao();
+        proposicao.setId(UUID.randomUUID().toString());
+        proposicao.setSequencia(1);
+        proposicao.setVisualizado(false);
+        proposicao.setFoiAtualizada(false);
+        proposicao.setIdPoliticoAutor("109429");
+        proposicao.setNomePolitico("Benes Leocádio");
+        proposicao.setEmenta("Uma proposicao dummy criada para teste");
+        proposicao.setFotoPolitico("https://www.camara.leg.br/internet/deputado/bandep/109429.jpg");
+        //proposicao.setDataApresentacao(data);
+        //proposicao.setDataAtualizacao(data);
+        proposicao.setEstadoPolitico("RN");
+        proposicao.setSiglaPartido("REPUBLICANOS");
+
+        firestoreProposicaoService.salvarProposicao(proposicao);
+    }
+
+    public void deletarTodasProposicoes() throws ExecutionException, InterruptedException {
+        firestoreProposicaoService.deletarTodasProposicoes();
+        firestorePoliticoService.limparTotalizadorProposicoesPoliticos();
+    }
+
+
     private void salvarProposicoesPorData(String data) throws InterruptedException, ExecutionException {
-
         politicosComProposicao = new HashSet<>();
-
         var urisDeProposicoes = getUrisDeProposicoesDaApi(data);
-
         politicosIds = firestorePoliticoService
                 .getPoliticos()
                 .parallelStream()
                 .map(p -> p.getId())
                 .collect(Collectors.toList());
 
-        try {
-            urisDeProposicoes
-                    .parallelStream()
-                    .forEach(uriProposicao -> salvarProposicaoNoFirestore(uriProposicao, data));
+        List<Proposicao> proposicoes = urisDeProposicoes
+                .parallelStream()
+                .map(uriProp -> buscarDadosCompletoProposicaoNaApi(uriProp))
+                .map(ProposicaoCompleto::build)
+                .filter(Proposicao::temTipoDescricaoValido)
+                .collect(Collectors.toList());
 
-        } catch (Exception e) {
-            System.err.println(e);
-            throw e;
-        }
+
+        proposicoes.forEach(proposicao -> {
+            if (politicosIds.contains(getIdPoliticoAutorDaProposicao(proposicao))) {
+                Proposicao proposicaoSalva = salvarProposicaoNoFirestore(proposicao);
+                if (proposicaoSalva != null) {
+                    politicoProposicoesRepository.inserirRelacaoPoliticoProposicao(proposicaoSalva);
+                    salvarTramitacoesParaProposicaoNoFirestore(proposicaoSalva, data);
+                    politicosComProposicao.add(proposicaoSalva.getIdPoliticoAutor());
+                }
+            }
+        });
 
         notificacaoFCMService.enviarNotificacaoParaSeguidoresDePoliticos("proposições", politicosComProposicao);
 
-
     }
 
-    private void salvarProposicaoNoFirestore(RetornoApiSimples uriProposicao, String data) {
+    private Proposicao salvarProposicaoNoFirestore(Proposicao proposicao)  {
+        Politico politicoDaProposicao = null;
+        try {
+            politicoDaProposicao = firestorePoliticoService.getPoliticoById(proposicao.getIdPoliticoAutor());
+            proposicao.configuraDadosPoliticoNaProposicao(politicoDaProposicao);
+            return firestoreProposicaoService.salvarProposicao(proposicao);
 
-        System.out.println("Começando com proposicao " + uriProposicao.getUri() + " ...");
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
-        var proposicaoCompleto =
-                buscarDadosCompletoProposicaoNaApi(uriProposicao);
-
-        if (!temTipoDescricaoValido(proposicaoCompleto)) return;
-
-        var politicoRetorno = getPoliticoAutorDaProposicao(proposicaoCompleto);
-
-        if (politicoRetorno.getId() != null && politicosIds.contains(politicoRetorno.getId())) {
-
-            var proposicao = proposicaoCompleto.build();
-            setPartidoLogoParaProposicao(politicoRetorno, proposicao);
-            proposicao.configuraDadosPoliticoNaProposicao(politicoRetorno);
-
-            var tramitacoes = getTramitacoesDaAPI(proposicao.getId(), data);
-
-            if (tramitacoes.size() > 0) {
-                proposicao.atualizaDadosUltimaTramitacao(
-                        Collections.max(tramitacoes, Comparator.comparing(Tramitacao::getSequencia)));
-
-                firestoreProposicaoService.salvarTramitacoesProposicao(tramitacoes, proposicao.getId());
-            }
-
-            //firestoreProposicaoService.salvarProposicao(proposicao);
-                            /*politicoProposicoesRepository.inserirRelacaoPoliticoProposicao(
-                                    proposicao.getIdPoliticoAutor(), proposicao.getId(), proposicao.getDataAtualizacao());
-                            System.out.println("proposicao  " + proposicao.getId() + " foi salva");*/
-            politicosComProposicao.add(proposicao.getIdPoliticoAutor());
+    private void salvarTramitacoesParaProposicaoNoFirestore(Proposicao proposicao, String data) {
+        var tramitacoes = getTramitacoesDaAPI(proposicao.getId(), data);
+        if (tramitacoes.size() > 0) {
+            proposicao.atualizaDadosUltimaTramitacao(
+                    Collections.max(tramitacoes, Comparator.comparing(Tramitacao::getSequencia)));
+            firestoreProposicaoService.salvarTramitacoesProposicao(tramitacoes, proposicao.getId());
         }
     }
 
-    private PoliticoCompleto getPoliticoAutorDaProposicao(ProposicaoCompleto proposicaoCompleto) {
+    private String getIdPoliticoAutorDaProposicao(Proposicao proposicao) {
 
         var autoresSimples = this.restTemplate
-                .getForObject(proposicaoCompleto.getUriAutores(), RetornoApiAutoresProposicao.class).getDados();
+                .getForObject(proposicao.getIdPoliticoAutor(), RetornoApiAutoresProposicao.class).getDados();
 
         RetornoApiSimples retPolitico = null;
         if (autoresSimples.size() > 0) {
@@ -123,12 +147,12 @@ public class ProposicaoService {
         }
 
         if (retPolitico != null && retPolitico.getUri() != null && retPolitico.getUri() != "") {
-            return Objects.requireNonNull(this.restTemplate.getForObject(
-                    retPolitico.getUri(), RetornoApiPoliticosCompleto.class)).dados;
+            PoliticoCompleto politicoCompleto = this.restTemplate.getForObject(
+                    retPolitico.getUri(), RetornoApiPoliticosCompleto.class).dados;
+            return politicoCompleto == null ? null : politicoCompleto.getId();
         } else {
             return null;
         }
-
     }
 
     private ProposicaoCompleto buscarDadosCompletoProposicaoNaApi(RetornoApiSimples uriProposicao) {
@@ -156,28 +180,6 @@ public class ProposicaoService {
             pagina++;
         }
         return retSimplesProposicoes;
-    }
-
-    private boolean temTipoDescricaoValido(ProposicaoCompleto proposicaoCompleto) {
-        var descricaoTipo = proposicaoCompleto.getDescricaoTipo();
-        if (descricaoTipo.equals("Projeto de Lei") ||
-                descricaoTipo.equals("Indicação") ||
-                descricaoTipo.startsWith("Requerimento")) {
-            return true;
-        }
-        return false;
-    }
-
-    private void setPartidoLogoParaProposicao(PoliticoCompleto politicoRetorno, Proposicao proposicao) {
-        try {
-            var politicoProposicao =
-                    firestorePoliticoService.getPoliticoById(politicoRetorno.getId());
-            proposicao.setUrlPartidoLogo(politicoProposicao.getUrlPartidoLogo());
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     public void atualizaTramitacoes(String dataInformada) {
@@ -222,33 +224,5 @@ public class ProposicaoService {
         return this.restTemplate.getForObject(
                 URI_PROPOSICAO + "/" + proposicaoId + "/tramitacoes?dataFim=" + data,
                 RetornoApiTramitacoes.class).dados;
-    }
-
-    public void deletaProposicoes() throws ExecutionException, InterruptedException {
-        firestoreProposicaoService.deletarTodasProposicoes();
-    }
-
-    public void criarDummyProposicao() {
-
-        var proposicao = new Proposicao();
-        proposicao.setId(UUID.randomUUID().toString());
-        proposicao.setSequencia(1);
-        proposicao.setVisualizado(false);
-        proposicao.setFoiAtualizada(false);
-        proposicao.setIdPoliticoAutor("109429");
-        proposicao.setNomePolitico("Benes Leocádio");
-        proposicao.setEmenta("Uma proposicao dummy criada para teste");
-        proposicao.setFotoPolitico("https://www.camara.leg.br/internet/deputado/bandep/109429.jpg");
-        //proposicao.setDataApresentacao(data);
-        //proposicao.setDataAtualizacao(data);
-        proposicao.setEstadoPolitico("RN");
-        proposicao.setSiglaPartido("REPUBLICANOS");
-
-        firestoreProposicaoService.salvarProposicao(proposicao);
-    }
-
-    public void deletarTodasProposicoes() throws ExecutionException, InterruptedException {
-        firestoreProposicaoService.deletarTodasProposicoes();
-        firestorePoliticoService.limparTotalizadorProposicoesPoliticos();
     }
 }

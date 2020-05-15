@@ -1,6 +1,9 @@
 package com.gladguys.polisscheduler.model;
 
+import com.gladguys.polisscheduler.services.firestore.FirestorePoliticoService;
 import lombok.Data;
+
+import java.util.concurrent.ExecutionException;
 
 @Data
 public class Proposicao {
@@ -28,16 +31,26 @@ public class Proposicao {
     private String urlPartidoLogo;
     private boolean visualizado;
 
-    public void configuraDadosPoliticoNaProposicao(PoliticoCompleto politicoRetorno) {
-        this.setNomePolitico(politicoRetorno.getUltimoStatus().getNomeEleitoral());
-        this.setIdPoliticoAutor(politicoRetorno.getId());
-        this.setSiglaPartido(politicoRetorno.getUltimoStatus().getSiglaPartido());
-        this.setFotoPolitico(politicoRetorno.getUltimoStatus().getUrlFoto());
-        this.setEstadoPolitico(politicoRetorno.getUltimoStatus().getSiglaUf());
+    public void configuraDadosPoliticoNaProposicao(Politico politico) {
+        this.setNomePolitico(politico.getNomeEleitoral());
+        this.setIdPoliticoAutor(politico.getId());
+        this.setSiglaPartido(politico.getSiglaPartido());
+        this.setFotoPolitico(politico.getUrlFoto());
+        this.setEstadoPolitico(politico.getSiglaUf());
+        this.setUrlPartidoLogo(politico.getUrlPartidoLogo());
     }
 
     public void atualizaDadosUltimaTramitacao(Tramitacao tramitacao) {
         this.descricaoTramitacao = tramitacao.getDescricaoTramitacao();
         this.despacho = tramitacao.getDespacho();
+    }
+
+    public boolean temTipoDescricaoValido() {
+        if (descricaoTipo.equals("Projeto de Lei") ||
+                descricaoTipo.equals("Indicação") ||
+                descricaoTipo.startsWith("Requerimento")) {
+            return true;
+        }
+        return false;
     }
 }
