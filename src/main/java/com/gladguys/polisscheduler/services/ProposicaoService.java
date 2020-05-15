@@ -1,12 +1,11 @@
 package com.gladguys.polisscheduler.services;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import com.gladguys.polisscheduler.model.*;
+import com.gladguys.polisscheduler.repository.PoliticoProposicoesRepository;
 import com.gladguys.polisscheduler.services.firestore.FirestorePoliticoService;
 import com.gladguys.polisscheduler.services.firestore.FirestoreProposicaoService;
 import com.gladguys.polisscheduler.utils.DataUtil;
@@ -24,23 +23,26 @@ public class ProposicaoService {
     private final FirestoreProposicaoService firestoreProposicaoService;
     private final FirestorePoliticoService firestorePoliticoService;
     private final FirestoreService firestoreService;
+    private final PoliticoProposicoesRepository politicoProposicoesRepository;
 
     public ProposicaoService(RestTemplateBuilder restTemplateBuilder,
                              FirestoreProposicaoService firestoreProposicaoService,
-                             FirestorePoliticoService firestorePoliticoService, FirestoreService firestoreService) {
+                             FirestorePoliticoService firestorePoliticoService,
+                             FirestoreService firestoreService,
+                             PoliticoProposicoesRepository politicoProposicoesRepository) {
 
         this.restTemplate = restTemplateBuilder.build();
         this.firestoreProposicaoService = firestoreProposicaoService;
         this.firestorePoliticoService = firestorePoliticoService;
         this.firestoreService = firestoreService;
+        this.politicoProposicoesRepository = politicoProposicoesRepository;
     }
 
     public void salvarProposicoes(String data) throws InterruptedException, ExecutionException {
         if (data == null) {
             data = DataUtil.getDataOntem();
         }
-        //salvarProposicoesNoFirestore(data);
-        atualizaTramitacoes(data);
+        salvarProposicoesNoFirestore(data);
     }
 
     private void salvarProposicoesNoFirestore(String data) throws InterruptedException, ExecutionException {
@@ -98,7 +100,8 @@ public class ProposicaoService {
                             proposicao.configuraDadosPoliticoNaProposicao(politicoRetorno);
                             System.out.println("salvando proposicao " + proposicao.getId());
 
-                            var tramitacoes = getTramitacoesDaAPI(proposicao, data);
+                            var tramitacoes = getTramitacoesDaAPI(proposicao.getId(), data);
+
                             if (tramitacoes.size() > 0) {
                                 proposicao.atualizaDadosUltimaTramitacao(
                                         Collections.max(tramitacoes, Comparator.comparing(Tramitacao::getSequencia)));
@@ -108,7 +111,9 @@ public class ProposicaoService {
                                 System.out.println("tramitacoes foram salvas");
                             }
 
-                            firestoreProposicaoService.salvarProposicao(proposicao);
+                            //firestoreProposicaoService.salvarProposicao(proposicao);
+                            politicoProposicoesRepository.inserirRelacaoPoliticoProposicao(
+                                    proposicao.getIdPoliticoAutor(), proposicao.getId(), proposicao.getDataAtualizacao());
                             System.out.println("proposicao  " + proposicao.getId() + " foi salva");
 
                         }
@@ -145,57 +150,46 @@ public class ProposicaoService {
         }
     }
 
-    public void atualizaTramitacoes(String data) {
-        try {
-            List<Proposicao> proposicoesNoFirestore = firestoreProposicaoService.getProposicoes();
-            proposicoesNoFirestore.forEach(p -> atualizaTramitacao(p, data));
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
+    public void atualizaTramitacoes(String dataInformada) {
+        String dataBusca;
+        if (dataInformada == null) {
+            dataBusca = DataUtil.getDataOntem();
+        } else {
+            dataBusca = dataInformada;
+        }
+        List<PoliticoProposicao> politicoProposicoes = politicoProposicoesRepository.getTodos();
+        politicoProposicoes.forEach(p -> atualizaTramitacao(p, dataBusca));
+
+    }
+
+    private void atualizaTramitacao(PoliticoProposicao politicoProposicao, String data) {
+        List<Tramitacao> tramitacoesNovas = getTramitacoesDaAPI(politicoProposicao.getProposicao(), data);
+        var tramiteNovoMaisRecente =
+                Collections.max(tramitacoesNovas, Comparator.comparing(Tramitacao::getSequencia));
+        firestoreProposicaoService.salvarTramitacoesProposicao(tramitacoesNovas, politicoProposicao.getProposicao());
+        atualizarProposicaoComNovasTramitacoes(politicoProposicao, tramiteNovoMaisRecente);
+    }
+
+    private void atualizarProposicaoComNovasTramitacoes(PoliticoProposicao politicoProposicao, Tramitacao ultimoTramite) {
+        if (politicoProposicao.estaDesatualizado(ultimoTramite)) {
+            Proposicao proposicao = firestoreProposicaoService.getById(politicoProposicao);
+
+            proposicao.setFoiAtualizada(true);
+            proposicao.setVisualizado(false);
+            proposicao.setDescricaoSituacao(ultimoTramite.getDescricaoSituacao());
+            proposicao.setDespacho(ultimoTramite.getDespacho());
+            proposicao.setDescricaoTramitacao(ultimoTramite.getDescricaoTramitacao());
+            proposicao.setSequencia(ultimoTramite.getSequencia());
+            proposicao.setDataAtualizacao(ultimoTramite.getDataHora());
+
+            firestoreProposicaoService.salvarProposicao(proposicao);
+            politicoProposicoesRepository.updateDataAtualizacao(politicoProposicao, ultimoTramite.getDataHora());
         }
     }
 
-    private void atualizaTramitacao(Proposicao proposicao, String data) {
-        try {
-            List<Tramitacao> tramitacoesNovas = getTramitacoesDaAPI(proposicao, data);
-
-            int quantidadeTramitacoesAtual = firestoreProposicaoService
-                    .getQuantidadeTramitacoes(proposicao.getId());
-
-            if (haAtualizacaoDeTramitacoes(tramitacoesNovas, quantidadeTramitacoesAtual)) {
-                var tramiteNovoMaisRecente =
-                        Collections.max(tramitacoesNovas, Comparator.comparing(Tramitacao::getSequencia));
-
-                firestoreProposicaoService.salvarTramitacoesProposicao(tramitacoesNovas,
-                        proposicao.getId());
-                atualizarProposicaoComNovasTramitacoes(proposicao, tramiteNovoMaisRecente);
-
-            }
-
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private boolean haAtualizacaoDeTramitacoes(List<Tramitacao> tramitacoesNovas, int quantidadeTramitacoesAtual) {
-        return tramitacoesNovas.size() > 0
-                && tramitacoesNovas.size() > quantidadeTramitacoesAtual;
-    }
-
-    private void atualizarProposicaoComNovasTramitacoes(Proposicao proposicao, Tramitacao ultimoTramite) {
-        proposicao.setFoiAtualizada(true);
-        proposicao.setVisualizado(false);
-        proposicao.setDescricaoSituacao(ultimoTramite.getDescricaoSituacao());
-        proposicao.setDespacho(ultimoTramite.getDespacho());
-        proposicao.setDescricaoTramitacao(ultimoTramite.getDescricaoTramitacao());
-        proposicao.setSequencia(ultimoTramite.getSequencia());
-        proposicao.setDataAtualizacao(ultimoTramite.getDataHora());
-
-        firestoreProposicaoService.salvarProposicao(proposicao);
-    }
-
-    private List<Tramitacao> getTramitacoesDaAPI(Proposicao proposicao, String data) {
+    private List<Tramitacao> getTramitacoesDaAPI(String proposicaoId, String data) {
         return this.restTemplate.getForObject(
-                URI_PROPOSICAO + "/" + proposicao.getId() + "/tramitacoes?dataFim=" + data,
+                URI_PROPOSICAO + "/" + proposicaoId + "/tramitacoes?dataFim=" + data,
                 RetornoApiTramitacoes.class).dados;
     }
 

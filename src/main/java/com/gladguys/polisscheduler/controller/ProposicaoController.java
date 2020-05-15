@@ -28,6 +28,18 @@ public class ProposicaoController {
 		}
 	}
 
+	@GetMapping(value = "/tramites")
+	public ResponseEntity<String> atualizaTramites(@RequestParam(value = "data", required = false) String data) {
+		try {
+			proposicaoService.atualizaTramitacoes(data);
+			return ResponseEntity.ok("Proposicoes salvas com sucesso!");
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+		}
+	}
+
+
+
 	@GetMapping(value = "/new-dummy")
 	public ResponseEntity<String> criarDummyProposicoes() {
 		try {

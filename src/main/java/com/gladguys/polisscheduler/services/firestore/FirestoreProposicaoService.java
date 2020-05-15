@@ -6,6 +6,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import com.gladguys.polisscheduler.model.Politico;
+import com.gladguys.polisscheduler.model.PoliticoProposicao;
 import com.gladguys.polisscheduler.model.Proposicao;
 import com.gladguys.polisscheduler.model.Tramitacao;
 import com.google.api.core.ApiFuture;
@@ -16,6 +17,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class FirestoreProposicaoService {
 
+    public static final String ATIVIDADES_POLITICO = "atividadesPolitico";
+    public static final String ATIVIDADES = "atividades";
+    public static final String TRAMITACOES = "tramitacoes";
+    public static final String TRAMITACOES_PROPOSICAO = "tramitacoesProposicao";
+    public static final String TIPO_ATIVIDADE = "tipoAtividade";
+    public static final String PROPOSICAO = "PROPOSICAO";
     private final Firestore db;
     private final FirestorePoliticoService firestorePoliticoService;
 
@@ -26,7 +33,7 @@ public class FirestoreProposicaoService {
 
     public void salvarProposicao(Proposicao proposicao) {
 
-        db.collection("atividades").document(proposicao.getIdPoliticoAutor()).collection("atividadesPolitico")
+        db.collection(ATIVIDADES).document(proposicao.getIdPoliticoAutor()).collection(ATIVIDADES_POLITICO)
                 .document(proposicao.getId()).set(proposicao);
     }
 
@@ -39,12 +46,12 @@ public class FirestoreProposicaoService {
 
     public void salvarTramitacoesProposicao(List<Tramitacao> tramitacoes, String id) {
 
-        db.collection("tramitacoes").document(id).delete();
+        db.collection(TRAMITACOES).document(id).delete();
 
         tramitacoes.parallelStream().forEach(t ->
-                db.collection("tramitacoes")
+                db.collection(TRAMITACOES)
                         .document(id)
-                        .collection("tramitacoesProposicao")
+                        .collection(TRAMITACOES_PROPOSICAO)
                         .document(String.valueOf(t.getSequencia())).set(t));
     }
 
@@ -71,9 +78,9 @@ public class FirestoreProposicaoService {
 
     public int getQuantidadeTramitacoes(String proposicaoId) throws InterruptedException, ExecutionException {
 
-        return db.collection("tramitacoes")
+        return db.collection(TRAMITACOES)
                 .document(proposicaoId)
-                .collection("tramitacoesProposicao")
+                .collection(TRAMITACOES_PROPOSICAO)
                 .get()
                 .get()
                 .getDocuments().size();
@@ -85,10 +92,10 @@ public class FirestoreProposicaoService {
         List<Proposicao> proposicoesPolitico = new ArrayList<>();
 
         final ApiFuture<QuerySnapshot> future =
-                db.collection("atividades")
+                db.collection(ATIVIDADES)
                         .document(idPolitico)
-                        .collection("atividadesPolitico")
-                        .whereEqualTo("tipoAtividade", "PROPOSICAO")
+                        .collection(ATIVIDADES_POLITICO)
+                        .whereEqualTo(TIPO_ATIVIDADE, PROPOSICAO)
                         .get();
 
         final List<QueryDocumentSnapshot> documents = future.get().getDocuments();
@@ -101,10 +108,10 @@ public class FirestoreProposicaoService {
     private void deletarProposicoesPorPoliticoId(String p) {
         QuerySnapshot queryDocumentSnapshots = null;
         try {
-            queryDocumentSnapshots = db.collection("atividades")
+            queryDocumentSnapshots = db.collection(ATIVIDADES)
                     .document(p)
-                    .collection("atividadesPolitico")
-                    .whereEqualTo("tipoAtividade", "PROPOSICAO")
+                    .collection(ATIVIDADES_POLITICO)
+                    .whereEqualTo(TIPO_ATIVIDADE, PROPOSICAO)
                     .get()
                     .get();
 
@@ -120,4 +127,21 @@ public class FirestoreProposicaoService {
         }
     }
 
+    public Proposicao getById(PoliticoProposicao politicoProposicao) {
+        try {
+            return db.collection(ATIVIDADES)
+                    .document(politicoProposicao.getPolitico())
+                    .collection(ATIVIDADES_POLITICO)
+                    .document(politicoProposicao.getProposicao())
+                    .get()
+                    .get()
+                    .toObject(Proposicao.class);
+            
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }
