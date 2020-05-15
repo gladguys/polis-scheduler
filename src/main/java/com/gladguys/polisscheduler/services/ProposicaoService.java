@@ -24,18 +24,21 @@ public class ProposicaoService {
     private final FirestorePoliticoService firestorePoliticoService;
     private final FirestoreService firestoreService;
     private final PoliticoProposicoesRepository politicoProposicoesRepository;
+    private final NotificacaoFCMService notificacaoFCMService;
 
     public ProposicaoService(RestTemplateBuilder restTemplateBuilder,
                              FirestoreProposicaoService firestoreProposicaoService,
                              FirestorePoliticoService firestorePoliticoService,
                              FirestoreService firestoreService,
-                             PoliticoProposicoesRepository politicoProposicoesRepository) {
+                             PoliticoProposicoesRepository politicoProposicoesRepository,
+                             NotificacaoFCMService notificacaoFCMService) {
 
         this.restTemplate = restTemplateBuilder.build();
         this.firestoreProposicaoService = firestoreProposicaoService;
         this.firestorePoliticoService = firestorePoliticoService;
         this.firestoreService = firestoreService;
         this.politicoProposicoesRepository = politicoProposicoesRepository;
+        this.notificacaoFCMService = notificacaoFCMService;
     }
 
     public void salvarProposicoes(String data) throws InterruptedException, ExecutionException {
@@ -46,6 +49,9 @@ public class ProposicaoService {
     }
 
     private void salvarProposicoesNoFirestore(String data) throws InterruptedException, ExecutionException {
+
+        var politicosComProposicao = new HashSet<>();
+
         List<String> politicosId =
                 firestorePoliticoService
                         .getPoliticos()
@@ -115,17 +121,19 @@ public class ProposicaoService {
                             politicoProposicoesRepository.inserirRelacaoPoliticoProposicao(
                                     proposicao.getIdPoliticoAutor(), proposicao.getId(), proposicao.getDataAtualizacao());
                             System.out.println("proposicao  " + proposicao.getId() + " foi salva");
-
+                            politicosComProposicao.add(politicosId);
                         }
                     }
                 }
-
 
             });
         } catch (Exception e) {
             System.err.println(e);
             throw e;
         }
+
+
+
     }
 
     private boolean temTipoDescricaoValido(ProposicaoCompleto proposicaoCompleto) {
