@@ -58,13 +58,16 @@ public class ProposicaoService {
         var urisDeProposicoes = getUrisDeProposicoesDaApi(data);
 
         politicosIds = firestorePoliticoService
-                        .getPoliticos()
-                        .parallelStream()
-                        .map(p -> p.getId())
-                        .collect(Collectors.toList());
+                .getPoliticos()
+                .parallelStream()
+                .map(p -> p.getId())
+                .collect(Collectors.toList());
 
         try {
-            urisDeProposicoes.parallelStream().forEach(uriProposicao -> salvarProposicaoNoFirestore(uriProposicao, data));
+            urisDeProposicoes
+                    .parallelStream()
+                    .forEach(uriProposicao -> salvarProposicaoNoFirestore(uriProposicao, data));
+
         } catch (Exception e) {
             System.err.println(e);
             throw e;
@@ -80,49 +83,57 @@ public class ProposicaoService {
         System.out.println("Começando com proposicao " + uriProposicao.getUri() + " ...");
 
         var proposicaoCompleto =
-                Objects.requireNonNull(
-                        this.restTemplate.getForObject(uriProposicao.getUri(), RetornoApiProposicaoCompleto.class)).dados;
+                buscarDadosCompletoProposicaoNaApi(uriProposicao);
 
-        if (temTipoDescricaoValido(proposicaoCompleto)) {
-            var autores = this.restTemplate
-                    .getForObject(proposicaoCompleto.getUriAutores(), RetornoApiAutoresProposicao.class).getDados();
+        if (!temTipoDescricaoValido(proposicaoCompleto)) return;
 
-            RetornoApiSimples retPolitico = null;
-            if (autores.size() > 0) {
-                retPolitico = autores.get(0);
+        var politicoRetorno = getPoliticoAutorDaProposicao(proposicaoCompleto);
+
+        if (politicoRetorno.getId() != null && politicosIds.contains(politicoRetorno.getId())) {
+
+            var proposicao = proposicaoCompleto.build();
+            setPartidoLogoParaProposicao(politicoRetorno, proposicao);
+            proposicao.configuraDadosPoliticoNaProposicao(politicoRetorno);
+
+            var tramitacoes = getTramitacoesDaAPI(proposicao.getId(), data);
+
+            if (tramitacoes.size() > 0) {
+                proposicao.atualizaDadosUltimaTramitacao(
+                        Collections.max(tramitacoes, Comparator.comparing(Tramitacao::getSequencia)));
+
+                firestoreProposicaoService.salvarTramitacoesProposicao(tramitacoes, proposicao.getId());
             }
-            if (retPolitico != null && retPolitico.getUri() != null && retPolitico.getUri() != "") {
-                var politicoRetorno =
-                        Objects.requireNonNull(this.restTemplate.getForObject(
-                                retPolitico.getUri(), RetornoApiPoliticosCompleto.class)).dados;
 
-                if (politicoRetorno.getId() != null && politicosIds.contains(politicoRetorno.getId())) {
-
-                    var proposicao = proposicaoCompleto.build();
-                    setPartidoLogoParaProposicao(politicoRetorno, proposicao);
-                    proposicao.configuraDadosPoliticoNaProposicao(politicoRetorno);
-                    System.out.println("salvando proposicao " + proposicao.getId());
-
-                    var tramitacoes = getTramitacoesDaAPI(proposicao.getId(), data);
-
-                    if (tramitacoes.size() > 0) {
-                        proposicao.atualizaDadosUltimaTramitacao(
-                                Collections.max(tramitacoes, Comparator.comparing(Tramitacao::getSequencia)));
-                        System.out.println("tramitacoes a salvar da proposicao " + proposicao.getId());
-                        firestoreProposicaoService.salvarTramitacoesProposicao(tramitacoes,
-                                proposicao.getId());
-                        System.out.println("tramitacoes foram salvas");
-                    }
-
-                    //firestoreProposicaoService.salvarProposicao(proposicao);
+            //firestoreProposicaoService.salvarProposicao(proposicao);
                             /*politicoProposicoesRepository.inserirRelacaoPoliticoProposicao(
                                     proposicao.getIdPoliticoAutor(), proposicao.getId(), proposicao.getDataAtualizacao());
                             System.out.println("proposicao  " + proposicao.getId() + " foi salva");*/
-                    politicosComProposicao.add(proposicao.getIdPoliticoAutor());
-                }
-            }
+            politicosComProposicao.add(proposicao.getIdPoliticoAutor());
+        }
+    }
+
+    private PoliticoCompleto getPoliticoAutorDaProposicao(ProposicaoCompleto proposicaoCompleto) {
+
+        var autoresSimples = this.restTemplate
+                .getForObject(proposicaoCompleto.getUriAutores(), RetornoApiAutoresProposicao.class).getDados();
+
+        RetornoApiSimples retPolitico = null;
+        if (autoresSimples.size() > 0) {
+            retPolitico = autoresSimples.get(0);
         }
 
+        if (retPolitico != null && retPolitico.getUri() != null && retPolitico.getUri() != "") {
+            return Objects.requireNonNull(this.restTemplate.getForObject(
+                    retPolitico.getUri(), RetornoApiPoliticosCompleto.class)).dados;
+        } else {
+            return null;
+        }
+
+    }
+
+    private ProposicaoCompleto buscarDadosCompletoProposicaoNaApi(RetornoApiSimples uriProposicao) {
+        return Objects.requireNonNull(
+                this.restTemplate.getForObject(uriProposicao.getUri(), RetornoApiProposicaoCompleto.class)).dados;
     }
 
     private List<RetornoApiSimples> getUrisDeProposicoesDaApi(String data) {
@@ -189,7 +200,8 @@ public class ProposicaoService {
         atualizarProposicaoComNovasTramitacoes(politicoProposicao, tramiteNovoMaisRecente);
     }
 
-    private void atualizarProposicaoComNovasTramitacoes(PoliticoProposicao politicoProposicao, Tramitacao ultimoTramite) {
+    private void atualizarProposicaoComNovasTramitacoes(PoliticoProposicao politicoProposicao, Tramitacao
+            ultimoTramite) {
         if (politicoProposicao.estaDesatualizado(ultimoTramite)) {
             Proposicao proposicao = firestoreProposicaoService.getById(politicoProposicao);
 
