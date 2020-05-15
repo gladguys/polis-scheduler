@@ -50,7 +50,7 @@ public class ProposicaoService {
 
     private void salvarProposicoesNoFirestore(String data) throws InterruptedException, ExecutionException {
 
-        var politicosComProposicao = new HashSet<>();
+        Set<String> politicosComProposicao = new HashSet<>();
 
         List<String> politicosId =
                 firestorePoliticoService
@@ -118,10 +118,10 @@ public class ProposicaoService {
                             }
 
                             //firestoreProposicaoService.salvarProposicao(proposicao);
-                            politicoProposicoesRepository.inserirRelacaoPoliticoProposicao(
+                            /*politicoProposicoesRepository.inserirRelacaoPoliticoProposicao(
                                     proposicao.getIdPoliticoAutor(), proposicao.getId(), proposicao.getDataAtualizacao());
-                            System.out.println("proposicao  " + proposicao.getId() + " foi salva");
-                            politicosComProposicao.add(politicosId);
+                            System.out.println("proposicao  " + proposicao.getId() + " foi salva");*/
+                            politicosComProposicao.add(proposicao.getIdPoliticoAutor());
                         }
                     }
                 }
@@ -132,6 +132,7 @@ public class ProposicaoService {
             throw e;
         }
 
+        notificacaoFCMService.enviarNotificacaoParaSeguidoresDePoliticos("proposições", politicosComProposicao);
 
 
     }

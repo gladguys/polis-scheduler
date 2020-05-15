@@ -20,14 +20,16 @@ public class NotificacaoFCMService {
     public void enviarNotificacaoParaSeguidoresDePoliticos(String tipoNotificacao, Set<String> politicosIds) {
         Set<Usuario> usuariosPorPoliticosIds = getUsuariosPorPoliticosIds(politicosIds);
         usuariosPorPoliticosIds.stream().map(u -> u.getFcmToken()).distinct().forEach(userToken -> {
-            enviarNotificacao(userToken, tipoNotificacao);
+            if (userToken != null) {
+                enviarNotificacao(userToken, tipoNotificacao);
+            }
         });
     }
 
     private void enviarNotificacao(String userToken, String tipoNotificacao) {
 
-        String titulo = "Novas " + tipoNotificacao + " no Pólis!";
-        String body = "Você tem novas informações de " + tipoNotificacao + " de políticos que você segue,";
+        String titulo = "Novas " + " despesas de políticos " + " no Pólis!";
+        String body = "Você tem novas informações de " + " despesas dos políticos" + " que você segue.r mais ";
 
         Message message = Message.builder()
                 .setAndroidConfig(AndroidConfig.builder()
@@ -37,7 +39,7 @@ public class NotificacaoFCMService {
                                 .setTitle(titulo)
                                 .setBody(body)
                                 .setIcon("stock_ticker_update")
-                                .setColor("#f45342")
+                                .setColor("#000000")
                                 .build())
                         .build())
                 .putData("click_action", "FLUTTER_NOTIFICATION_CLICK")
