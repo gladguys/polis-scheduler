@@ -39,6 +39,8 @@ public class DespesasService {
 
     public void salvarDespesasMesAtualEAnterior(Integer mes, Integer ano) throws InterruptedException, ExecutionException {
         politicosComProposicao = new HashSet<>();
+
+        //TODO: buscar politicos da base do scheduler
         List<Politico> politicos = firestorePoliticoService.getPoliticos();
 
         politicos.parallelStream().forEach(p -> {
