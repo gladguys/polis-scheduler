@@ -1,5 +1,7 @@
 # polis-scheduler
 
+> #### Diagrama arquitetural do Polis
+
 > #### Salvando proposições
 
 endpoint: http://localhost:8080/proposicoes?data=AAAA-MM-DD
@@ -12,8 +14,20 @@ endpoint: http://localhost:8080/proposicoes?data=AAAA-MM-DD
 - atualiza o status tramite de cada proposição para o status do tramite mais recente dessa proposição;
 - envia notificação para cada usuário que tenha proposição nova de algum político que ele siga;
 
+> #### Deletando proposições
+
+> #### Resetando totalizador de proposições
+
 > #### Salvando despesas
 
-> #### Atualizando totalizador de despesas dos políticos
+> #### Deletando despesas
 
-> ####  
+> #### Atualizando totalizador de despesas
+
+> #### Resetando totalizador de despesas
+
+> ####  Atualizando dados políticos
+
+> #### Atualizando dados partidos
+
+> #### 
