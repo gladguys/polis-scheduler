@@ -51,10 +51,6 @@ public class ProposicaoService {
         salvarProposicoesPorData(data);
     }
 
-    public void deletaProposicoes() throws ExecutionException, InterruptedException {
-        firestoreProposicaoService.deletarTodasProposicoes();
-    }
-
     public void criarDummyProposicao() {
 
         var proposicao = new Proposicao();
@@ -98,25 +94,32 @@ public class ProposicaoService {
 
 
         proposicoes.forEach(proposicao -> {
-            if (politicosIds.contains(getIdPoliticoAutorDaProposicao(proposicao))) {
-                Proposicao proposicaoSalva = salvarProposicaoNoFirestore(proposicao);
+            var idPoliticoAutorDaProposicao = getIdPoliticoAutorDaProposicao(proposicao);
+            var tramitacoes = getTramitacoesDaAPI(proposicao.getId(), data);
+
+            if (politicosIds.contains(idPoliticoAutorDaProposicao)) {
+                proposicao.setIdPoliticoAutor(idPoliticoAutorDaProposicao);
+                Proposicao proposicaoSalva = salvarProposicaoNoFirestore(proposicao, tramitacoes);
+
                 if (proposicaoSalva != null) {
                     politicoProposicoesRepository.inserirRelacaoPoliticoProposicao(proposicaoSalva);
-                    salvarTramitacoesParaProposicaoNoFirestore(proposicaoSalva, data);
+                    salvarTramitacoesParaProposicaoNoFirestore(tramitacoes, proposicao.getId());
                     politicosComProposicao.add(proposicaoSalva.getIdPoliticoAutor());
                 }
             }
         });
 
-        notificacaoFCMService.enviarNotificacaoParaSeguidoresDePoliticos("proposições", politicosComProposicao);
+        //notificacaoFCMService.enviarNotificacaoParaSeguidoresDePoliticos("proposições", politicosComProposicao);
 
     }
 
-    private Proposicao salvarProposicaoNoFirestore(Proposicao proposicao)  {
+    private Proposicao salvarProposicaoNoFirestore(Proposicao proposicao, List<Tramitacao> tramitacoes)  {
         Politico politicoDaProposicao = null;
         try {
             politicoDaProposicao = firestorePoliticoService.getPoliticoById(proposicao.getIdPoliticoAutor());
             proposicao.configuraDadosPoliticoNaProposicao(politicoDaProposicao);
+            proposicao.atualizaDadosUltimaTramitacao(
+                    Collections.max(tramitacoes, Comparator.comparing(Tramitacao::getSequencia)));
             return firestoreProposicaoService.salvarProposicao(proposicao);
 
         } catch (ExecutionException e) {
@@ -127,19 +130,16 @@ public class ProposicaoService {
         return null;
     }
 
-    private void salvarTramitacoesParaProposicaoNoFirestore(Proposicao proposicao, String data) {
-        var tramitacoes = getTramitacoesDaAPI(proposicao.getId(), data);
+    private void salvarTramitacoesParaProposicaoNoFirestore(List<Tramitacao> tramitacoes, String proposicaoId) {
         if (tramitacoes.size() > 0) {
-            proposicao.atualizaDadosUltimaTramitacao(
-                    Collections.max(tramitacoes, Comparator.comparing(Tramitacao::getSequencia)));
-            firestoreProposicaoService.salvarTramitacoesProposicao(tramitacoes, proposicao.getId());
+            firestoreProposicaoService.salvarTramitacoesProposicao(tramitacoes, proposicaoId);
         }
     }
 
     private String getIdPoliticoAutorDaProposicao(Proposicao proposicao) {
 
         var autoresSimples = this.restTemplate
-                .getForObject(proposicao.getIdPoliticoAutor(), RetornoApiAutoresProposicao.class).getDados();
+                .getForObject(proposicao.getUriAutores(), RetornoApiAutoresProposicao.class).getDados();
 
         RetornoApiSimples retPolitico = null;
         if (autoresSimples.size() > 0) {
@@ -202,8 +202,7 @@ public class ProposicaoService {
         atualizarProposicaoComNovasTramitacoes(politicoProposicao, tramiteNovoMaisRecente);
     }
 
-    private void atualizarProposicaoComNovasTramitacoes(PoliticoProposicao politicoProposicao, Tramitacao
-            ultimoTramite) {
+    private void atualizarProposicaoComNovasTramitacoes(PoliticoProposicao politicoProposicao, Tramitacao ultimoTramite) {
         if (politicoProposicao.estaDesatualizado(ultimoTramite)) {
             Proposicao proposicao = firestoreProposicaoService.getById(politicoProposicao);
 

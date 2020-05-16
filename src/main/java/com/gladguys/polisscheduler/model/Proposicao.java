@@ -30,6 +30,7 @@ public class Proposicao {
     private String dataAtualizacao;
     private String urlPartidoLogo;
     private boolean visualizado;
+    private String uriAutores;
 
     public void configuraDadosPoliticoNaProposicao(Politico politico) {
         this.setNomePolitico(politico.getNomeEleitoral());

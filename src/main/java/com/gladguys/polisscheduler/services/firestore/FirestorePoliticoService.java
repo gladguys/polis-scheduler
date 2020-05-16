@@ -82,9 +82,22 @@ public class FirestorePoliticoService {
     }
 
     public void atualizarTotalizadorDespesaPolitico(String politicoId, BigDecimal valorAIncrementar) {
-        db.collection("politicos")
-                .document(politicoId)
-                .update("totalDespesas", FieldValue.increment(valorAIncrementar.doubleValue()));
+
+        try {
+            Politico politico = db.collection("politicos")
+                    .document(politicoId)
+                    .get()
+                    .get().toObject(Politico.class);
+
+            db.collection("politicos")
+                    .document(politicoId)
+                    .update("totalDespesas", valorAIncrementar.doubleValue() + politico.getTotalDespesas());
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
     }
 
     public void atualizarPosicaoRankingDespesaPolitico(String politicoId, int pos) {

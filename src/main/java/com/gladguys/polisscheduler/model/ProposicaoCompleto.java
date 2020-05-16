@@ -39,6 +39,7 @@ public class ProposicaoCompleto {
         proposicao.setDataAtualizacao(proposicao.getDataApresentacao());
         proposicao.setEmentaDetalhada(this.ementaDetalhada);
         proposicao.setSequencia(1);
+        proposicao.setUriAutores(uriAutores);
 
         return proposicao;
     }
