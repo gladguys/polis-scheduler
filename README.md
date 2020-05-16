@@ -2,6 +2,8 @@
 
 > #### Diagrama arquitetural do Polis
 
+![Fluxograma Polis](https://github.com/gladguys/polis-scheduler/blob/master/fluxograma_polis.png)
+
 > #### Salvando proposições
 
 endpoint: http://localhost:8080/proposicoes?data=AAAA-MM-DD
