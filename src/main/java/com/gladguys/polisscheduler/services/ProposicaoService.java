@@ -62,8 +62,8 @@ public class ProposicaoService {
         proposicao.setNomePolitico("Benes Leocádio");
         proposicao.setEmenta("Uma proposicao dummy criada para teste");
         proposicao.setFotoPolitico("https://www.camara.leg.br/internet/deputado/bandep/109429.jpg");
-        //proposicao.setDataApresentacao(data);
-        //proposicao.setDataAtualizacao(data);
+        proposicao.setDataApresentacao("2020-05-15");
+        proposicao.setDataAtualizacao("2020-05-15");
         proposicao.setEstadoPolitico("RN");
         proposicao.setSiglaPartido("REPUBLICANOS");
 
@@ -109,7 +109,9 @@ public class ProposicaoService {
             }
         });
 
-        //notificacaoFCMService.enviarNotificacaoParaSeguidoresDePoliticos("proposições", politicosComProposicao);
+        if (politicosComProposicao.size() > 0) {
+            notificacaoFCMService.enviarNotificacaoParaSeguidoresDePoliticos("propostas apresentadas por político", politicosComProposicao);
+        }
 
     }
 

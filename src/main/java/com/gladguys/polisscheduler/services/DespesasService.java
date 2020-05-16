@@ -1,6 +1,7 @@
 package com.gladguys.polisscheduler.services;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -25,16 +26,21 @@ public class DespesasService {
     private final RestTemplate restTemplate;
     private final FirestoreDespesaService firestoreService;
     private final FirestorePoliticoService firestorePoliticoService;
+    private final NotificacaoFCMService notificacaoFCMService;
+    private HashSet<String> politicosComProposicao;
 
     public DespesasService(RestTemplateBuilder restTemplateBuilder, FirestoreDespesaService firestoreService,
-                           FirestorePoliticoService firestorePoliticoService) {
+                           FirestorePoliticoService firestorePoliticoService, NotificacaoFCMService notificacaoFCMService) {
         this.restTemplate = restTemplateBuilder.build();
         this.firestoreService = firestoreService;
         this.firestorePoliticoService = firestorePoliticoService;
+        this.notificacaoFCMService = notificacaoFCMService;
     }
 
     public void salvarDespesasMesAtualEAnterior(Integer mes, Integer ano) throws InterruptedException, ExecutionException {
+        politicosComProposicao = new HashSet<>();
         List<Politico> politicos = firestorePoliticoService.getPoliticos();
+
         politicos.parallelStream().forEach(p -> {
             int numeroMes = mes != null ? mes : DataUtil.getNumeroMes();
             int numeroAno = ano != null ? ano : DataUtil.getNumeroAno();
@@ -69,11 +75,16 @@ public class DespesasService {
                 d.setUrlPartidoLogo(p.getUrlPartidoLogo());
 
                 d.buildData();
+                politicosComProposicao.add(p.getId());
             });
 
             firestoreService.salvarDespesas(
                     despesasDeHoje.stream().filter(d -> d.getDataDocumento() != null).collect(Collectors.toList()),
                     p.getId());
+
+            if (politicosComProposicao.size() > 0) {
+                notificacaoFCMService.enviarNotificacaoParaSeguidoresDePoliticos("despesas de político", politicosComProposicao);
+            }
         });
     }
 
@@ -82,8 +93,7 @@ public class DespesasService {
         //pega todos os deputados da base
         List<Politico> politicos = firestorePoliticoService.getPoliticos();
         politicos.parallelStream().forEach(politico -> {
-            String urlParaDespesasPolitico = URI_POLITICOS + politico.getId() + "/despesas?ano=" + ano + "&mes=" + mes
-                    + "&pagina=1&itens=100000000&ordem=ASC&ordenarPor=ano";
+            String urlParaDespesasPolitico = montaUrlParaDespesasPolitico(ano, mes, politico);
 
             List<Despesa> despesas = this.restTemplate
                     .getForObject(urlParaDespesasPolitico, RetornoDespesas.class).getDados();
@@ -98,8 +108,13 @@ public class DespesasService {
         });
     }
 
+    private String montaUrlParaDespesasPolitico(String ano, String mes, Politico politico) {
+        return URI_POLITICOS + politico.getId() + "/despesas?ano=" + ano + "&mes=" + mes
+                + "&pagina=1&itens=100000000&ordem=ASC&ordenarPor=ano";
+    }
+
     public void deletarTodasDespesas() throws ExecutionException, InterruptedException {
-        //this.firestoreService.deletarTodasDespesas();
+        this.firestoreService.deletarTodasDespesas();
         this.firestorePoliticoService.zerarTotalizadorDespesas();
     }
 

@@ -19,17 +19,19 @@ public class NotificacaoFCMService {
 
     public void enviarNotificacaoParaSeguidoresDePoliticos(String tipoNotificacao, Set<String> politicosIds) {
         Set<Usuario> usuariosPorPoliticosIds = getUsuariosPorPoliticosIds(politicosIds);
-        usuariosPorPoliticosIds.stream().map(u -> u.getFcmToken()).distinct().forEach(userToken -> {
-            if (userToken != null) {
-                enviarNotificacao(userToken, tipoNotificacao);
-            }
-        });
+        if (usuariosPorPoliticosIds != null) {
+            usuariosPorPoliticosIds.stream().map(u -> u.getFcmToken()).distinct().forEach(userToken -> {
+                if (userToken != null) {
+                    enviarNotificacao(userToken, tipoNotificacao);
+                }
+            });
+        }
     }
 
     private void enviarNotificacao(String userToken, String tipoNotificacao) {
 
-        String titulo = "Novas " + " despesas de políticos " + " no Pólis!";
-        String body = "Você tem novas informações de " + " despesas dos políticos" + " que você segue.r mais ";
+        String titulo = "Novas " + tipoNotificacao + " no Pólis!";
+        String body = "Você tem novas informações de " + tipoNotificacao + " que você segue.";
 
         Message message = Message.builder()
                 .setAndroidConfig(AndroidConfig.builder()
