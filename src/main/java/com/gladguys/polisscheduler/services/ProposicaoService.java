@@ -25,8 +25,6 @@ public class ProposicaoService {
     private final FirestoreService firestoreService;
     private final PoliticoProposicoesRepository politicoProposicoesRepository;
     private final NotificacaoFCMService notificacaoFCMService;
-
-    private List<String> politicosIds;
     private HashSet<String> politicosComProposicao;
 
     public ProposicaoService(RestTemplateBuilder restTemplateBuilder,
@@ -79,11 +77,6 @@ public class ProposicaoService {
     private void salvarProposicoesPorData(String data) throws InterruptedException, ExecutionException {
         politicosComProposicao = new HashSet<>();
         var urisDeProposicoes = getUrisDeProposicoesDaApi(data);
-        politicosIds = firestorePoliticoService
-                .getPoliticos()
-                .parallelStream()
-                .map(p -> p.getId())
-                .collect(Collectors.toList());
 
         List<Proposicao> proposicoes = urisDeProposicoes
                 .parallelStream()
@@ -97,27 +90,25 @@ public class ProposicaoService {
             var idPoliticoAutorDaProposicao = getIdPoliticoAutorDaProposicao(proposicao);
             var tramitacoes = getTramitacoesDaAPI(proposicao.getId(), data);
 
-            if (politicosIds.contains(idPoliticoAutorDaProposicao)) {
-                proposicao.setIdPoliticoAutor(idPoliticoAutorDaProposicao);
-                Proposicao proposicaoSalva = salvarProposicaoNoFirestore(proposicao, tramitacoes);
+            proposicao.setIdPoliticoAutor(idPoliticoAutorDaProposicao);
+            Proposicao proposicaoSalva = salvarProposicaoNoFirestore(proposicao, tramitacoes);
 
-                if (proposicaoSalva != null) {
-                    politicoProposicoesRepository.inserirRelacaoPoliticoProposicao(proposicaoSalva);
-                    salvarTramitacoesParaProposicaoNoFirestore(tramitacoes, proposicao.getId());
-                    politicosComProposicao.add(proposicaoSalva.getIdPoliticoAutor());
-                }
+            if (proposicaoSalva != null) {
+                politicoProposicoesRepository.inserirRelacaoPoliticoProposicao(proposicaoSalva);
+                salvarTramitacoesParaProposicaoNoFirestore(tramitacoes, proposicao.getId());
+                politicosComProposicao.add(proposicaoSalva.getIdPoliticoAutor());
             }
         });
 
         if (politicosComProposicao.size() > 0) {
             notificacaoFCMService.enviarNotificacaoParaSeguidoresDePoliticos("propostas apresentadas por político", politicosComProposicao);
         }
-
     }
 
-    private Proposicao salvarProposicaoNoFirestore(Proposicao proposicao, List<Tramitacao> tramitacoes)  {
+    private Proposicao salvarProposicaoNoFirestore(Proposicao proposicao, List<Tramitacao> tramitacoes) {
         Politico politicoDaProposicao = null;
         try {
+            //TODO: buscar politicos da base do scheduler
             politicoDaProposicao = firestorePoliticoService.getPoliticoById(proposicao.getIdPoliticoAutor());
             proposicao.configuraDadosPoliticoNaProposicao(politicoDaProposicao);
             proposicao.atualizaDadosUltimaTramitacao(
