@@ -1,6 +1,8 @@
 # polis-scheduler
 
-> #### Diagrama arquitetural do Polis
+> #### FLuxmograma de dados do Polis
+
+![Fluxograma Polis](https://github.com/gladguys/polis-scheduler/blob/master/fluxograma_polis.png)
 
 > #### Salvando proposições
 
