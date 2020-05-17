@@ -19,6 +19,7 @@ public class ProposicaoCompleto {
     private String keywords;
     private String uriAutores;
     private String ementaDetalhada;
+    private String urlInteiroTeor;
 
     public Proposicao build() {
         DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
@@ -40,6 +41,8 @@ public class ProposicaoCompleto {
         proposicao.setEmentaDetalhada(this.ementaDetalhada);
         proposicao.setSequencia(1);
         proposicao.setUriAutores(uriAutores);
+        proposicao.setUrlInteiroTeor(urlInteiroTeor);
+
 
         return proposicao;
     }

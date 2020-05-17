@@ -31,6 +31,7 @@ public class Proposicao {
     private String urlPartidoLogo;
     private boolean visualizado;
     private String uriAutores;
+    private String urlInteiroTeor;
 
     public void configuraDadosPoliticoNaProposicao(Politico politico) {
         this.setNomePolitico(politico.getNomeEleitoral());
