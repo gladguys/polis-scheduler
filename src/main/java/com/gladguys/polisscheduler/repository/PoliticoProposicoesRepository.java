@@ -16,6 +16,7 @@ public class PoliticoProposicoesRepository {
     final JdbcTemplate template;
 
     final String INSERT_QUERY = "insert into politico_proposicao (politico, proposicao, atualizacao) values (?, ?, ?)";
+    final String UPDATE_QUERY = "update politico_proposicao set atualizacao = ? where proposicao = ?";
     final String SELECT_QUERY = "select * from politico_proposicao";
     final String UPDATE_ATUALIZACAO = "update politico_proposicao SET atualizacao = ? where politico = ? and proposicao = ?;";
     final String CHECK_IF_EXISTS = "SELECT count(*) FROM politico_proposicao WHERE politico = ? AND proposicao = ?";
@@ -26,7 +27,11 @@ public class PoliticoProposicoesRepository {
 
     public int inserirRelacaoPoliticoProposicao(Proposicao proposicao) {
         if (proposicao == null) return -1;
-        return template.update(INSERT_QUERY, proposicao.getIdPoliticoAutor(), proposicao.getId(), proposicao.getDataAtualizacao());
+        if (!exists(proposicao))
+            return template.update(INSERT_QUERY, proposicao.getIdPoliticoAutor(), proposicao.getId(), proposicao.getDataAtualizacao());
+        else
+            return template.update(UPDATE_QUERY, proposicao.getDataAtualizacao(), proposicao.getId());
+
     }
 
     public boolean exists(Proposicao proposicao) {
