@@ -47,6 +47,8 @@ public class FirestoreDespesaService {
                 e.printStackTrace();
             } catch (ExecutionException e) {
                 e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
     }
