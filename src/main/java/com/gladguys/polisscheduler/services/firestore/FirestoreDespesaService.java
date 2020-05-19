@@ -9,11 +9,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import com.gladguys.polisscheduler.model.Despesa;
-import com.google.api.core.ApiFuture;
+import com.gladguys.polisscheduler.repository.DespesasRepository;
 import com.google.cloud.firestore.Firestore;
 
 import com.google.cloud.firestore.QuerySnapshot;
-import com.google.cloud.firestore.WriteResult;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -21,25 +20,35 @@ public class FirestoreDespesaService {
 
     private final Firestore db;
     private final FirestorePoliticoService firestorePoliticoService;
+    private DespesasRepository despesasRepository;
 
-    public FirestoreDespesaService(Firestore firestore, FirestorePoliticoService firestorePoliticoService) {
+    public FirestoreDespesaService(Firestore firestore,
+                                   FirestorePoliticoService firestorePoliticoService,
+                                   DespesasRepository despesasRepository) {
         this.db = firestore;
         this.firestorePoliticoService = firestorePoliticoService;
 
+        this.despesasRepository = despesasRepository;
     }
 
     public void salvarDespesas(List<Despesa> despesas, String politicoId) {
-        try {
-            despesas.forEach(d -> {
+
+        despesas.forEach(d -> {
+            try {
                 db.collection("atividades")
                         .document(politicoId)
                         .collection("atividadesPolitico")
-                        .document(montaIdDespesa(d))
-                        .create(d);
-            });
-        } catch (Exception e) {
-            System.err.println(e);
-        }
+                        .document(d.getId())
+                        .set(d).get();
+
+                despesasRepository.inserirDespesa(d);
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     public String salvarDespesa(Despesa despesa) {
@@ -80,13 +89,7 @@ public class FirestoreDespesaService {
         }
     }
 
-    private String montaIdDespesa(Despesa d) {
-        return d.getDataDocumento().replace("-", "") + d.getIdPolitico()
-                + d.getValorDocumento().replace(".", "") + d.getCodDocumento();
-    }
-
-
-    public void salvarTotalDespesaPoliticoPorMes(String id, String ano , String mes, BigDecimal totalDespesas) {
+    public void salvarTotalDespesaPoliticoPorMes(String id, String ano, String mes, BigDecimal totalDespesas) {
         Map<String, Object> mesValor = new HashMap<>();
         mesValor.put("total", totalDespesas.doubleValue());
         db.collection("totalizador_despesas")

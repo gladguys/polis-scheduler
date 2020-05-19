@@ -50,7 +50,8 @@ public class Proposicao {
     public boolean temTipoDescricaoValido() {
         if (descricaoTipo.equals("Projeto de Lei") ||
                 descricaoTipo.equals("Indicação") ||
-                descricaoTipo.startsWith("Requerimento")) {
+                descricaoTipo.startsWith("Requerimento") ||
+                descricaoTipo.equals("Emenda de Plenário")) {
             return true;
         }
         return false;

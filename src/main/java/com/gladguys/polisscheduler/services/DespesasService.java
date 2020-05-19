@@ -11,6 +11,7 @@ import com.gladguys.polisscheduler.model.Despesa;
 import com.gladguys.polisscheduler.model.Politico;
 import com.gladguys.polisscheduler.model.RetornoDespesas;
 import com.gladguys.polisscheduler.model.TipoAtividade;
+import com.gladguys.polisscheduler.repository.DespesasRepository;
 import com.gladguys.polisscheduler.services.firestore.FirestoreDespesaService;
 import com.gladguys.polisscheduler.services.firestore.FirestorePoliticoService;
 import com.gladguys.polisscheduler.utils.DataUtil;
@@ -28,13 +29,18 @@ public class DespesasService {
     private final FirestorePoliticoService firestorePoliticoService;
     private final NotificacaoFCMService notificacaoFCMService;
     private HashSet<String> politicosComProposicao;
+    private DespesasRepository despesasRepository;
 
-    public DespesasService(RestTemplateBuilder restTemplateBuilder, FirestoreDespesaService firestoreService,
-                           FirestorePoliticoService firestorePoliticoService, NotificacaoFCMService notificacaoFCMService) {
+    public DespesasService(RestTemplateBuilder restTemplateBuilder,
+                           FirestoreDespesaService firestoreService,
+                           FirestorePoliticoService firestorePoliticoService,
+                           NotificacaoFCMService notificacaoFCMService,
+                           DespesasRepository despesasRepository) {
         this.restTemplate = restTemplateBuilder.build();
         this.firestoreService = firestoreService;
         this.firestorePoliticoService = firestorePoliticoService;
         this.notificacaoFCMService = notificacaoFCMService;
+        this.despesasRepository = despesasRepository;
     }
 
     public void salvarDespesasMesAtualEAnterior(Integer mes, Integer ano) throws InterruptedException, ExecutionException {
@@ -75,19 +81,26 @@ public class DespesasService {
                 d.setFotoPolitico(p.getUrlFoto());
                 d.setEstadoPolitico(p.getSiglaUf());
                 d.setUrlPartidoLogo(p.getUrlPartidoLogo());
-
+                d.montaIdDespesa();
                 d.buildData();
                 politicosComProposicao.add(p.getId());
             });
 
             firestoreService.salvarDespesas(
-                    despesasDeHoje.stream().filter(d -> d.getDataDocumento() != null).collect(Collectors.toList()),
-                    p.getId());
+                    despesasDeHoje
+                            .stream()
+                            .filter(d -> d.getDataDocumento() != null)
+                            .filter(this::ehNovaDespesa).collect(Collectors.toList()), p.getId());
 
-            if (politicosComProposicao.size() > 0) {
-                notificacaoFCMService.enviarNotificacaoParaSeguidoresDePoliticos("despesas de político", politicosComProposicao);
-            }
         });
+
+        if (politicosComProposicao.size() > 0) {
+            //              notificacaoFCMService.enviarNotificacaoParaSeguidoresDePoliticos("despesas de político", politicosComProposicao);
+        }
+    }
+
+    private boolean ehNovaDespesa(Despesa despesa) {
+        return this.despesasRepository.exists(despesa);
     }
 
     public void totalizadorDespesasPorAnoEmes(String ano, String mes) throws ExecutionException, InterruptedException {

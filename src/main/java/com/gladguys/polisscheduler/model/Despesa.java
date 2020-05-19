@@ -10,6 +10,7 @@ import lombok.Data;
 @Data
 public class Despesa {
 
+    private String id;
     private String ano;
     private TipoAtividade tipoAtividade = TipoAtividade.DESPESA;
     private String fotoPolitico;
@@ -50,5 +51,10 @@ public class Despesa {
 
             this.dataAtualizacao = new SimpleDateFormat("yyyy-MM-dd").format(dataDocumentoString).toString();
         }
+    }
+
+    public void montaIdDespesa() {
+        this.id =  this.dataDocumento.replace("-", "") + this.idPolitico
+                + this.valorDocumento.replace(".", "") + this.codDocumento;
     }
 }
