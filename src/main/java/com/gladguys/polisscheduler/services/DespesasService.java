@@ -59,11 +59,11 @@ public class DespesasService {
             String urlParaDespesasPoliticoMesPassado;
             if (numeroMes == 1) {
                 urlParaDespesasPoliticoMesPassado =
-                        URI_POLITICOS + p.getId() + "/despesas?ano="+numeroAno+"&mes=12&ordem=ASC&ordenarPor=ano";
+                        URI_POLITICOS + p.getId() + "/despesas?ano=" + numeroAno + "&mes=12&ordem=ASC&ordenarPor=ano";
             } else {
                 urlParaDespesasPoliticoMesPassado =
                         URI_POLITICOS +
-                                p.getId() + "/despesas?ano="+numeroAno+"&mes=" + (numeroMes - 1) + "&ordem=ASC&ordenarPor=ano";
+                                p.getId() + "/despesas?ano=" + numeroAno + "&mes=" + (numeroMes - 1) + "&ordem=ASC&ordenarPor=ano";
             }
 
             List<Despesa> despesasDeHoje = this.restTemplate
@@ -83,24 +83,36 @@ public class DespesasService {
                 d.setUrlPartidoLogo(p.getUrlPartidoLogo());
                 d.montaIdDespesa();
                 d.buildData();
-                politicosComProposicao.add(p.getId());
             });
 
-            firestoreService.salvarDespesas(
-                    despesasDeHoje
-                            .stream()
-                            .filter(d -> d.getDataDocumento() != null)
-                            .filter(this::ehNovaDespesa).collect(Collectors.toList()), p.getId());
+            List<Despesa> despesasFiltradas = despesasDeHoje
+                    .stream()
+                    .filter(d -> d.getDataDocumento() != null)
+                    .filter(this::ehNovaDespesa).collect(Collectors.toList());
 
+            despesasFiltradas.forEach(d -> {
+                try {
+                    firestoreService.salvarDespesa(d);
+                    politicosComProposicao.add(p.getId());
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
         });
 
         if (politicosComProposicao.size() > 0) {
-            //              notificacaoFCMService.enviarNotificacaoParaSeguidoresDePoliticos("despesas de político", politicosComProposicao);
+            notificacaoFCMService.enviarNotificacaoParaSeguidoresDePoliticos(
+                    "despesas de político",
+                    politicosComProposicao.stream().distinct().collect(Collectors.toSet()));
         }
     }
 
     private boolean ehNovaDespesa(Despesa despesa) {
-        return this.despesasRepository.exists(despesa);
+        return !this.despesasRepository.exists(despesa);
     }
 
     public void totalizadorDespesasPorAnoEmes(String ano, String mes) throws ExecutionException, InterruptedException {
@@ -117,8 +129,8 @@ public class DespesasService {
                     .map(d -> new BigDecimal(d.getValorLiquido()))
                     .reduce((v1, v2) -> v1.add(v2));
 
-            firestoreService.salvarTotalDespesaPoliticoPorMes(politico.getId(),ano, mes, valorMes.orElse(new BigDecimal(0.0)));
-            firestorePoliticoService.atualizarTotalizadorDespesaPolitico(politico.getId(),valorMes.orElse(new BigDecimal(0.0)));
+            firestoreService.salvarTotalDespesaPoliticoPorMes(politico.getId(), ano, mes, valorMes.orElse(new BigDecimal(0.0)));
+            firestorePoliticoService.atualizarTotalizadorDespesaPolitico(politico.getId(), valorMes.orElse(new BigDecimal(0.0)));
 
         });
     }
@@ -154,6 +166,13 @@ public class DespesasService {
         despesa.setValorGlosa("0.0");
         despesa.setValorLiquido("200.42");
 
-        return firestoreService.salvarDespesa(despesa);
+        try {
+            return firestoreService.salvarDespesa(despesa);
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

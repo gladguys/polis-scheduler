@@ -94,9 +94,14 @@ public class ProposicaoService {
             Proposicao proposicaoSalva = salvarProposicaoNoFirestore(proposicao, tramitacoes);
 
             if (proposicaoSalva != null) {
-                politicoProposicoesRepository.inserirRelacaoPoliticoProposicao(proposicaoSalva);
-                salvarTramitacoesParaProposicaoNoFirestore(tramitacoes, proposicao.getId());
-                politicosComProposicao.add(proposicaoSalva.getIdPoliticoAutor());
+                try {
+                    politicoProposicoesRepository.inserirRelacaoPoliticoProposicao(proposicaoSalva);
+                    salvarTramitacoesParaProposicaoNoFirestore(tramitacoes, proposicao.getId());
+                    politicosComProposicao.add(proposicaoSalva.getIdPoliticoAutor());
+                } catch (Exception e) {
+                    e.getStackTrace();
+                    System.err.println(e);
+                }
             }
         });
 

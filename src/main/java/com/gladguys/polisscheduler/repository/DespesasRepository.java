@@ -17,9 +17,8 @@ public class DespesasRepository {
     }
 
     public boolean exists(Despesa despesa) {
-        boolean exists = false;
         int count = this.template.queryForObject(CHECK_IF_EXISTS, new Object[] { despesa.getId() }, Integer.class);
-        return count == 0;
+        return count > 0;
     }
 
     public int inserirDespesa(Despesa despesa) {

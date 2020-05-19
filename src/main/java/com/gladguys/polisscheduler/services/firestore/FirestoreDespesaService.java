@@ -31,35 +31,34 @@ public class FirestoreDespesaService {
         this.despesasRepository = despesasRepository;
     }
 
-    public void salvarDespesas(List<Despesa> despesas, String politicoId) {
+    public void salvarDespesas(Despesa despesa, String politicoId) {
+        try {
+            db.collection("atividades")
+                    .document(politicoId)
+                    .collection("atividadesPolitico")
+                    .document(despesa.getId())
+                    .set(despesa).get();
 
-        despesas.forEach(d -> {
-            try {
-                db.collection("atividades")
-                        .document(politicoId)
-                        .collection("atividadesPolitico")
-                        .document(d.getId())
-                        .set(d).get();
+            despesasRepository.inserirDespesa(despesa);
 
-                despesasRepository.inserirDespesa(d);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
     }
 
-    public String salvarDespesa(Despesa despesa) {
+    public String salvarDespesa(Despesa despesa) throws ExecutionException, InterruptedException {
         var despesaId = UUID.randomUUID().toString();
         db.collection("atividades")
                 .document(despesa.getIdPolitico())
                 .collection("atividadesPolitico")
                 .document(despesaId)
-                .create(despesa);
+                .set(despesa).get();
+        despesasRepository.inserirDespesa(despesa);
         return despesaId;
     }
 
