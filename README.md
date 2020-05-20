@@ -19,6 +19,7 @@
         3. salva a proposição na **base do scheduler (postgres)**
 4. É enviado uma **Notificação** para todos os usuários que sigam um dos políticos que tiveram proposições apresentadas.
 
+*obs: no caso de uma reexecução em uma data passada, o processo acontecerá normalmente: será feito update no firestore para os novos resultados daquela data, e as informações na base do scheduler não serão recriadas.*
 > #### Deletando proposições
 
 > #### Resetando totalizador de proposições
