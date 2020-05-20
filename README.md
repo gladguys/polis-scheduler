@@ -1,6 +1,6 @@
 # polis-scheduler
 
-> #### FLuxmograma de dados do Polis
+> #### Fluxograma de dados do Polis
 
 ![Fluxograma Polis](https://github.com/gladguys/polis-scheduler/blob/master/fluxograma_polis.png)
 
