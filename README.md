@@ -20,13 +20,15 @@
 4. É enviado uma **Notificação** para todos os usuários que sigam um dos políticos que tiveram proposições apresentadas.
 
 *obs: no caso de uma reexecução em uma data passada, o processo acontecerá normalmente: será feito update no firestore para os novos resultados daquela data, e as informações na base do scheduler não serão recriadas.*
-> #### Deletando proposições
 
+> #### Deletando proposições
 1. é feita uma requisição ```GET /proposicoes/delete-all``` para o Polis-Scheduler
 2. todas as proposições do firestore são removidas
 3. todos os totalizadores de PL criados pelos políticos são zerados
-4. <span style="color:red"> *TODO* deleta as proposições na base do scheduler</span>
+4. ***TODO:* deleta as proposições na base do scheduler**
+
 > #### Resetando totalizador de proposições
+1. 
 
 > #### Salvando despesas
 

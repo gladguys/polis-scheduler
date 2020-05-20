@@ -18,7 +18,7 @@ public class DespesaController {
         this.despesasService = despesasService;
     }
 
-    @GetMapping("/{ano}/{mes}")
+    @GetMapping("/totalizador/{ano}/{mes}")
     public ResponseEntity<String> salvaTotalizadorDespesasPor(@PathVariable("ano") String ano, @PathVariable("mes") String mes) {
         try {
             despesasService.totalizadorDespesasPorAnoEmes(ano, mes);

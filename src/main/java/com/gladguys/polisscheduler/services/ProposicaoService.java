@@ -70,9 +70,12 @@ public class ProposicaoService {
 
     public void deletarTodasProposicoes() throws ExecutionException, InterruptedException {
         firestoreProposicaoService.deletarTodasProposicoes();
-        firestorePoliticoService.limparTotalizadorProposicoesPoliticos();
+        zerarTotalizadorProjetosLeiPoliticos();
     }
 
+    public void zerarTotalizadorProjetosLeiPoliticos() {
+        firestorePoliticoService.limparTotalizadorProposicoesPoliticos();
+    }
 
     private void salvarProposicoesPorData(String data) throws InterruptedException, ExecutionException {
         politicosComProposicao = new HashSet<>();

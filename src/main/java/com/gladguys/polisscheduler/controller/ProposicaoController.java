@@ -58,4 +58,14 @@ public class ProposicaoController {
 		}
 	}
 
+	@GetMapping(value = "/zerar-total-pl")
+	public ResponseEntity<String> zerarTotalizadorPl() {
+		try {
+			proposicaoService.zerarTotalizadorProjetosLeiPoliticos();
+			return ResponseEntity.ok("totalizador de projetos de lei zerados com sucesso");
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+		}
+	}
+
 }
