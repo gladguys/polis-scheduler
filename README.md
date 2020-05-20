@@ -6,7 +6,6 @@
 
 > #### Salvando proposições
 
-1. Google Cloud Scheduler irá ser disparado em determinada horas do dia e irá fazer requisições paginadas ```GET /proposicoes?data=AAAA-MM-DD``` para o Polis-Scheduler;
 2. Polis-Scheduler irá fazer uma requisição para API dados abertos ```GET /proposicoes?dataApresentacaoInicio=AAAA-MM-DD&dataApresentacaoInicio=AAAA-MM-DD``` e com isso terá uma lista com todas as informações básicas para as **proposições apresentadas** no dia AAAA-MM-DD.
 3. Essas informações básicas das proposições não é o suficiente pra montar as Proposições do dia. Então, para cada info proposição básica é feito os passos abaixo:
     1. dentro da proposição básica há o campo com a uri da API dados abertos que retorna todos os dados da proposição completa. Então é feito uma requisição ```GET /proposicoes/{id}``` para esse endpoint
@@ -32,7 +31,24 @@
 2. todos os totalizadores de PL criados pelos políticos são zerados
 
 > #### Salvando despesas
-
+A API dados abertos não disponibiliza uma busca de despesas do dia. Portanto, para simular o carregamento de despesas do dia, 
+nossa arquitetura irá buscar as despesas do mês informado (ou o mês vigente) e do mês anterior (para que possamos pegar despesas
+que foram lançadas com atrasos).
+Para buscar as despesas do dia (ou do mes/ano informados pela uri) é realizado o processo:  
+1. Polis-Scheduler vai receber uma requisição ``GET politicos/despesas?mes=MM&ano=YYYY``
+2. se ano e mes não forem passados, o código pegará o vigente
+3. Busca todos os políticos registrados no firestore na collection politicos
+4. Para cada político:
+    1. monta a uri para as despesas do mes atual
+    2. faz o request para a API dados abertos para buscar as despesas do mês anterior
+    3. monta a uri para as despesas do mes atual
+    4. faz o request para a API dados abertos para buscar as despesas do mês anterior
+    5. junta as duas listas de despesas (mes passado e atual) em uma única.
+    6. para cada despesa, preenche dados do politico, data e outras informações
+    7. é feito um filtro na lista de despesas para selecionar apenas as despesas novas no polis. Isso é feito olhando na **base do scheduler** se há registro para essa despesa.
+    8. Cada despesa nova é salva no firestore
+    9. é enviado notificação para os usuarios que sigam algum político com despesa nova. 
+    
 > #### Deletando despesas
 
 > #### Atualizando totalizador de despesas

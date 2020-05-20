@@ -53,6 +53,17 @@ public class Despesa {
         }
     }
 
+    public void montaDespesa(Politico p) {
+        idPolitico = p.getId();
+        nomePolitico = p.getNomeEleitoral();
+        siglaPartido = p.getSiglaPartido();
+        fotoPolitico = p.getUrlFoto();
+        estadoPolitico = p.getSiglaUf();
+        urlPartidoLogo = p.getUrlPartidoLogo();
+        this.montaIdDespesa();
+        this.buildData();
+    }
+
     public void montaIdDespesa() {
         this.id =  this.dataDocumento.replace("-", "") + this.idPolitico
                 + this.valorDocumento.replace(".", "") + this.codDocumento;

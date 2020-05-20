@@ -28,7 +28,7 @@ public class DespesasService {
     private final FirestoreDespesaService firestoreService;
     private final FirestorePoliticoService firestorePoliticoService;
     private final NotificacaoFCMService notificacaoFCMService;
-    private HashSet<String> politicosComProposicao;
+    private HashSet<String> politicosComDespesaNova;
     private DespesasRepository despesasRepository;
 
     public DespesasService(RestTemplateBuilder restTemplateBuilder,
@@ -44,56 +44,37 @@ public class DespesasService {
     }
 
     public void salvarDespesasMesAtualEAnterior(Integer mes, Integer ano) throws InterruptedException, ExecutionException {
-        politicosComProposicao = new HashSet<>();
+        politicosComDespesaNova = new HashSet<>();
 
         //TODO: buscar politicos da base do scheduler
         List<Politico> politicos = firestorePoliticoService.getPoliticos();
 
+        int numeroMes = mes != null ? mes : DataUtil.getNumeroMes();
+        int numeroAno = ano != null ? ano : DataUtil.getNumeroAno();
+
         politicos.parallelStream().forEach(p -> {
-            int numeroMes = mes != null ? mes : DataUtil.getNumeroMes();
-            int numeroAno = ano != null ? ano : DataUtil.getNumeroAno();
-
-            String urlParaDespesasPolitico =
+            String urlParaDespesasPoliticoMesVigente =
                     URI_POLITICOS + p.getId() + "/despesas?ano=" + numeroAno + "&mes=" + numeroMes + "&ordem=ASC&ordenarPor=ano";
+            List<Despesa> despesasDoMesVigente = this.restTemplate
+                    .getForObject(urlParaDespesasPoliticoMesVigente, RetornoDespesas.class).getDados();
 
-            String urlParaDespesasPoliticoMesPassado;
-            if (numeroMes == 1) {
-                urlParaDespesasPoliticoMesPassado =
-                        URI_POLITICOS + p.getId() + "/despesas?ano=" + numeroAno + "&mes=12&ordem=ASC&ordenarPor=ano";
-            } else {
-                urlParaDespesasPoliticoMesPassado =
-                        URI_POLITICOS +
-                                p.getId() + "/despesas?ano=" + numeroAno + "&mes=" + (numeroMes - 1) + "&ordem=ASC&ordenarPor=ano";
-            }
-
-            List<Despesa> despesasDeHoje = this.restTemplate
-                    .getForObject(urlParaDespesasPolitico, RetornoDespesas.class).getDados();
-
+            String urlParaDespesasPoliticoMesPassado= getUrlParaDespesasPoliticoMesAnterior(numeroMes, numeroAno, p);
             List<Despesa> despesasMesPassado = this.restTemplate
                     .getForObject(urlParaDespesasPoliticoMesPassado, RetornoDespesas.class).getDados();
 
-            despesasDeHoje.addAll(despesasMesPassado);
+            despesasDoMesVigente.addAll(despesasMesPassado);
 
-            despesasDeHoje.forEach(d -> {
-                d.setIdPolitico(p.getId());
-                d.setNomePolitico(p.getNomeEleitoral());
-                d.setSiglaPartido(p.getSiglaPartido());
-                d.setFotoPolitico(p.getUrlFoto());
-                d.setEstadoPolitico(p.getSiglaUf());
-                d.setUrlPartidoLogo(p.getUrlPartidoLogo());
-                d.montaIdDespesa();
-                d.buildData();
-            });
+            despesasDoMesVigente.forEach(d -> d.montaDespesa(p));
 
-            List<Despesa> despesasFiltradas = despesasDeHoje
+            var despesasNovas = despesasDoMesVigente
                     .stream()
                     .filter(d -> d.getDataDocumento() != null)
                     .filter(this::ehNovaDespesa).collect(Collectors.toList());
 
-            despesasFiltradas.forEach(d -> {
+            despesasNovas.forEach(d -> {
                 try {
                     firestoreService.salvarDespesa(d);
-                    politicosComProposicao.add(p.getId());
+                    politicosComDespesaNova.add(p.getId());
                 } catch (ExecutionException e) {
                     e.printStackTrace();
                 } catch (InterruptedException e) {
@@ -104,11 +85,24 @@ public class DespesasService {
             });
         });
 
-        if (politicosComProposicao.size() > 0) {
+        if (politicosComDespesaNova.size() > 0) {
             notificacaoFCMService.enviarNotificacaoParaSeguidoresDePoliticos(
                     "despesas de político",
-                    politicosComProposicao.stream().distinct().collect(Collectors.toSet()));
+                    politicosComDespesaNova.stream().distinct().collect(Collectors.toSet()));
         }
+    }
+
+    public String getUrlParaDespesasPoliticoMesAnterior(int numeroMes, int numeroAno, Politico p) {
+        String urlParaDespesasPoliticoMesPassado;
+        if (numeroMes == 1) {
+            urlParaDespesasPoliticoMesPassado =
+                    URI_POLITICOS + p.getId() + "/despesas?ano=" + numeroAno + "&mes=12&ordem=ASC&ordenarPor=ano";
+        } else {
+            urlParaDespesasPoliticoMesPassado =
+                    URI_POLITICOS +
+                            p.getId() + "/despesas?ano=" + numeroAno + "&mes=" + (numeroMes - 1) + "&ordem=ASC&ordenarPor=ano";
+        }
+        return urlParaDespesasPoliticoMesPassado;
     }
 
     private boolean ehNovaDespesa(Despesa despesa) {
