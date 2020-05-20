@@ -28,7 +28,8 @@
 4. ***TODO:* deleta as proposições na base do scheduler**
 
 > #### Resetando totalizador de proposições
-1. 
+1. requisição ``GET /proposicoes/zera-total-pl`` para o Polis-Scheduler
+2. todos os totalizadores de PL criados pelos políticos são zerados
 
 > #### Salvando despesas
 
