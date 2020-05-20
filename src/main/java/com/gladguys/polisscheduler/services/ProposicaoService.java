@@ -87,22 +87,24 @@ public class ProposicaoService {
 
 
         proposicoes.forEach(proposicao -> {
-            var idPoliticoAutorDaProposicao = getIdPoliticoAutorDaProposicao(proposicao);
             var tramitacoes = getTramitacoesDaAPI(proposicao.getId(), data);
+            var idPoliticoAutorDaProposicao = getIdsPoliticosAutorDaProposicao(proposicao);
 
-            proposicao.setIdPoliticoAutor(idPoliticoAutorDaProposicao);
-            Proposicao proposicaoSalva = salvarProposicaoNoFirestore(proposicao, tramitacoes);
+            idPoliticoAutorDaProposicao.forEach( idPolitico -> {
+                proposicao.setIdPoliticoAutor(idPolitico);
+                Proposicao proposicaoSalva = salvarProposicaoNoFirestore(proposicao, tramitacoes);
 
-            if (proposicaoSalva != null) {
-                try {
-                    politicoProposicoesRepository.inserirRelacaoPoliticoProposicao(proposicaoSalva);
-                    salvarTramitacoesParaProposicaoNoFirestore(tramitacoes, proposicao.getId());
-                    politicosComProposicao.add(proposicaoSalva.getIdPoliticoAutor());
-                } catch (Exception e) {
-                    e.getStackTrace();
-                    System.err.println(e);
+                if (proposicaoSalva != null) {
+                    try {
+                        politicoProposicoesRepository.inserirRelacaoPoliticoProposicao(proposicaoSalva);
+                        salvarTramitacoesParaProposicaoNoFirestore(tramitacoes, proposicao.getId());
+                        politicosComProposicao.add(proposicaoSalva.getIdPoliticoAutor());
+                    } catch (Exception e) {
+                        e.getStackTrace();
+                        System.err.println(e);
+                    }
                 }
-            }
+            });
         });
 
         if (politicosComProposicao.size() > 0) {
@@ -134,23 +136,23 @@ public class ProposicaoService {
         }
     }
 
-    private String getIdPoliticoAutorDaProposicao(Proposicao proposicao) {
-
+    private List<String> getIdsPoliticosAutorDaProposicao(Proposicao proposicao) {
+        var idsAutores = new ArrayList<String>();
         var autoresSimples = this.restTemplate
                 .getForObject(proposicao.getUriAutores(), RetornoApiAutoresProposicao.class).getDados();
 
-        RetornoApiSimples retPolitico = null;
         if (autoresSimples.size() > 0) {
-            retPolitico = autoresSimples.get(0);
+            autoresSimples.forEach(retPolitico -> {
+                if (retPolitico != null && retPolitico.getUri() != null && retPolitico.getUri() != "") {
+                    PoliticoCompleto politicoCompleto = this.restTemplate.getForObject(
+                            retPolitico.getUri(), RetornoApiPoliticosCompleto.class).dados;
+                    if (politicoCompleto != null && politicoCompleto.getId() != null) {
+                        idsAutores.add(politicoCompleto.getId());
+                    }
+                }
+            });
         }
-
-        if (retPolitico != null && retPolitico.getUri() != null && retPolitico.getUri() != "") {
-            PoliticoCompleto politicoCompleto = this.restTemplate.getForObject(
-                    retPolitico.getUri(), RetornoApiPoliticosCompleto.class).dados;
-            return politicoCompleto == null ? null : politicoCompleto.getId();
-        } else {
-            return null;
-        }
+        return  idsAutores;
     }
 
     private ProposicaoCompleto buscarDadosCompletoProposicaoNaApi(RetornoApiSimples uriProposicao) {

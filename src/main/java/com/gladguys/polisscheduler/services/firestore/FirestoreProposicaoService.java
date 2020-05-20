@@ -35,7 +35,7 @@ public class FirestoreProposicaoService {
 
         try {
             db.collection(ATIVIDADES).document(proposicao.getIdPoliticoAutor()).collection(ATIVIDADES_POLITICO)
-                    .document(proposicao.getId()).set(proposicao);
+                    .document(proposicao.getId()+proposicao.getIdPoliticoAutor()).set(proposicao);
             return proposicao;
         } catch (Exception e) {
             return null;
