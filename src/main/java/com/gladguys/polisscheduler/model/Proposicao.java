@@ -3,6 +3,7 @@ package com.gladguys.polisscheduler.model;
 import com.gladguys.polisscheduler.services.firestore.FirestorePoliticoService;
 import lombok.Data;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 @Data
@@ -34,12 +35,12 @@ public class Proposicao {
     private String urlInteiroTeor;
 
     public void configuraDadosPoliticoNaProposicao(Politico politico) {
-        this.setNomePolitico(politico.getNomeEleitoral());
-        this.setIdPoliticoAutor(politico.getId());
-        this.setSiglaPartido(politico.getSiglaPartido());
-        this.setFotoPolitico(politico.getUrlFoto());
-        this.setEstadoPolitico(politico.getSiglaUf());
-        this.setUrlPartidoLogo(politico.getUrlPartidoLogo());
+        nomePolitico = politico.getNomeEleitoral();
+        idPoliticoAutor = politico.getId();
+        siglaPartido = politico.getSiglaPartido();
+        fotoPolitico = politico.getUrlFoto();
+        estadoPolitico = politico.getSiglaUf();
+        urlPartidoLogo = politico.getUrlPartidoLogo();
     }
 
     public void atualizaDadosUltimaTramitacao(Tramitacao tramitacao) {
@@ -55,5 +56,11 @@ public class Proposicao {
             return true;
         }
         return false;
+    }
+
+    public void montaObjetoProposicao(Politico politicoDaProposicao, Tramitacao tramitacaoMaisRecente) {
+        this.id = this.getId() + this.getIdPoliticoAutor();
+        this.configuraDadosPoliticoNaProposicao(politicoDaProposicao);
+        this.atualizaDadosUltimaTramitacao(tramitacaoMaisRecente);
     }
 }

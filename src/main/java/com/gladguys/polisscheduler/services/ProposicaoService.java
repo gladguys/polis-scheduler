@@ -78,40 +78,44 @@ public class ProposicaoService {
     }
 
     private void salvarProposicoesPorData(String data) throws InterruptedException, ExecutionException {
-        politicosComProposicao = new HashSet<>();
-        var urisDeProposicoes = getUrisDeProposicoesDaApi(data);
+        try {
+            politicosComProposicao = new HashSet<>();
+            var urisDeProposicoes = getUrisDeProposicoesDaApi(data);
 
-        List<Proposicao> proposicoes = urisDeProposicoes
-                .parallelStream()
-                .map(uriProp -> buscarDadosCompletoProposicaoNaApi(uriProp))
-                .map(ProposicaoCompleto::build)
-                .filter(Proposicao::temTipoDescricaoValido)
-                .collect(Collectors.toList());
+            List<Proposicao> proposicoes = urisDeProposicoes
+                    .parallelStream()
+                    .map(uriProp -> buscarDadosCompletoProposicaoNaApi(uriProp))
+                    .map(ProposicaoCompleto::build)
+                    .filter(Proposicao::temTipoDescricaoValido)
+                    .collect(Collectors.toList());
 
 
-        proposicoes.forEach(proposicao -> {
-            var tramitacoes = getTramitacoesDaAPI(proposicao.getId(), data);
-            var idPoliticoAutorDaProposicao = getIdsPoliticosAutorDaProposicao(proposicao);
+            proposicoes.forEach(proposicao -> {
+                var tramitacoes = getTramitacoesDaAPI(proposicao.getId(), data);
+                var idPoliticoAutorDaProposicao = getIdsPoliticosAutorDaProposicao(proposicao);
 
-            idPoliticoAutorDaProposicao.forEach( idPolitico -> {
-                proposicao.setIdPoliticoAutor(idPolitico);
-                Proposicao proposicaoSalva = salvarProposicaoNoFirestore(proposicao, tramitacoes);
+                idPoliticoAutorDaProposicao.forEach(idPolitico -> {
+                    proposicao.setIdPoliticoAutor(idPolitico);
+                    Proposicao proposicaoSalva = salvarProposicaoNoFirestore(proposicao, tramitacoes);
 
-                if (proposicaoSalva != null) {
-                    try {
-                        politicoProposicoesRepository.inserirRelacaoPoliticoProposicao(proposicaoSalva);
-                        salvarTramitacoesParaProposicaoNoFirestore(tramitacoes, proposicao.getId());
-                        politicosComProposicao.add(proposicaoSalva.getIdPoliticoAutor());
-                    } catch (Exception e) {
-                        e.getStackTrace();
-                        System.err.println(e);
+                    if (proposicaoSalva != null) {
+                        try {
+                            politicoProposicoesRepository.inserirRelacaoPoliticoProposicao(proposicaoSalva);
+                            salvarTramitacoesParaProposicaoNoFirestore(tramitacoes, proposicao.getId());
+                            politicosComProposicao.add(proposicaoSalva.getIdPoliticoAutor());
+                        } catch (Exception e) {
+                            e.getStackTrace();
+                            System.err.println(e);
+                        }
                     }
-                }
+                });
             });
-        });
 
-        if (politicosComProposicao.size() > 0) {
-            notificacaoFCMService.enviarNotificacaoParaSeguidoresDePoliticos("propostas apresentadas por político", politicosComProposicao);
+            if (politicosComProposicao.size() > 0) {
+                notificacaoFCMService.enviarNotificacaoParaSeguidoresDePoliticos("propostas apresentadas por político", politicosComProposicao);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -120,15 +124,16 @@ public class ProposicaoService {
         try {
             //TODO: buscar politicos da base do scheduler
             politicoDaProposicao = firestorePoliticoService.getPoliticoById(proposicao.getIdPoliticoAutor());
-            proposicao.configuraDadosPoliticoNaProposicao(politicoDaProposicao);
-            proposicao.atualizaDadosUltimaTramitacao(
-                    Collections.max(tramitacoes, Comparator.comparing(Tramitacao::getSequencia)));
+            Tramitacao tramitacaoMaisRecente = Collections.max(tramitacoes, Comparator.comparing(Tramitacao::getSequencia));
+            proposicao.montaObjetoProposicao(politicoDaProposicao, tramitacaoMaisRecente);
             return firestoreProposicaoService.salvarProposicao(proposicao);
 
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
             e.printStackTrace();
+        } catch (Exception e) {
+            System.err.println(e);
         }
         return null;
     }
@@ -155,7 +160,7 @@ public class ProposicaoService {
                 }
             });
         }
-        return  idsAutores;
+        return idsAutores;
     }
 
     private ProposicaoCompleto buscarDadosCompletoProposicaoNaApi(RetornoApiSimples uriProposicao) {
