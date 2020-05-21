@@ -1,12 +1,12 @@
 # polis-scheduler
 
-> #### FLuxmograma de dados do Polis
+> #### Fluxograma de dados do Polis
 
 ![Fluxograma Polis](https://github.com/gladguys/polis-scheduler/blob/master/fluxograma_polis.png)
 
 > #### Salvando proposições
 
-1. Polis-Scheduler irá fazer uma requisição para API dados abertos ```GET /proposicoes?dataApresentacaoInicio=AAAA-MM-DD&dataApresentacaoInicio=AAAA-MM-DD``` e com isso terá uma lista com todas as informações básicas para as **proposições apresentadas** no dia AAAA-MM-DD.
+1. Polis-Scheduler irá fazer uma requisição para API dados abertos ```GET /proposicoes?dataApresentacaoInicio=AAAA-MM-DD&dataApresentacaoFim=AAAA-MM-DD``` e com isso terá uma lista com todas as informações básicas para as **proposições apresentadas** no dia AAAA-MM-DD.
 2. Essas informações básicas das proposições não é o suficiente pra montar as Proposições do dia. Então, para cada info proposição básica é feito os passos abaixo:
     1. dentro da proposição básica há o campo com a uri da API dados abertos que retorna todos os dados da proposição completa. Então é feito uma requisição ```GET /proposicoes/{id}``` para esse endpoint
     2. se essa proposição **NÃO É** uma *emenda*, *projeto de lei*, *indicação* ou *requerimento*, ela é ignorada e não será usada no Polis.
