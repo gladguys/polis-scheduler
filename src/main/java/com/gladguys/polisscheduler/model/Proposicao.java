@@ -59,7 +59,6 @@ public class Proposicao {
     }
 
     public void montaObjetoProposicao(Politico politicoDaProposicao, Tramitacao tramitacaoMaisRecente) {
-        this.id = this.getId() + this.getIdPoliticoAutor();
         this.configuraDadosPoliticoNaProposicao(politicoDaProposicao);
         this.atualizaDadosUltimaTramitacao(tramitacaoMaisRecente);
     }

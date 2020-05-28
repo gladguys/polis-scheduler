@@ -28,14 +28,13 @@ public class PoliticoProposicoesRepository {
     public int inserirRelacaoPoliticoProposicao(Proposicao proposicao) {
         if (proposicao == null) return -1;
         if (!exists(proposicao))
-            return template.update(INSERT_QUERY, proposicao.getIdPoliticoAutor(), proposicao.getId(), proposicao.getDataAtualizacao());
+            return template.update(INSERT_QUERY, proposicao.getIdPoliticoAutor(), proposicao.getId() + proposicao.getIdPoliticoAutor(), proposicao.getDataAtualizacao());
         else
-            return template.update(UPDATE_QUERY, proposicao.getDataAtualizacao(), proposicao.getId());
-
+            return template.update(UPDATE_QUERY, proposicao.getDataAtualizacao(), proposicao.getId() + proposicao.getIdPoliticoAutor());
     }
 
     public boolean exists(Proposicao proposicao) {
-        int count = this.template.queryForObject(CHECK_IF_EXISTS, new Object[] { proposicao.getIdPoliticoAutor(), proposicao.getId() }, Integer.class);
+        int count = this.template.queryForObject(CHECK_IF_EXISTS, new Object[] { proposicao.getIdPoliticoAutor(), proposicao.getId() + proposicao.getIdPoliticoAutor() }, Integer.class);
         return count > 0;
     }
 
@@ -44,6 +43,6 @@ public class PoliticoProposicoesRepository {
     }
 
     public void updateDataAtualizacao(PoliticoProposicao politicoProposicao, String dataHora) {
-        template.update(UPDATE_ATUALIZACAO, dataHora, politicoProposicao.getPolitico(), politicoProposicao.getProposicao());
+        template.update(UPDATE_ATUALIZACAO, dataHora, politicoProposicao.getPolitico(), politicoProposicao.getProposicao() + politicoProposicao.getPolitico() );
     }
 }
