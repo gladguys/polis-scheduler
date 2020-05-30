@@ -92,10 +92,11 @@ public class ProposicaoService {
 
             proposicoes.forEach(proposicao -> {
                 var tramitacoes = getTramitacoesDaAPI(proposicao.getId(), data);
-                var idPoliticoAutorDaProposicao = getIdsPoliticosAutorDaProposicao(proposicao);
+                var politicosAutores = getPoliticosAutorDaProposicao(proposicao);
+                proposicao.setAutores(politicosAutores);
+                        politicosAutores.forEach(politico -> {
 
-                idPoliticoAutorDaProposicao.forEach(idPolitico -> {
-                    proposicao.setIdPoliticoAutor(idPolitico);
+                    proposicao.setIdPoliticoAutor(politico.getId());
                     Proposicao proposicaoSalva = salvarProposicaoNoFirestore(proposicao, tramitacoes);
 
                     if (proposicaoSalva != null) {
@@ -144,8 +145,8 @@ public class ProposicaoService {
         }
     }
 
-    private List<String> getIdsPoliticosAutorDaProposicao(Proposicao proposicao) {
-        var idsAutores = new ArrayList<String>();
+    private List<PoliticoCompleto> getPoliticosAutorDaProposicao(Proposicao proposicao) {
+        var politicosAutores = new ArrayList<PoliticoCompleto>();
         var autoresSimples = this.restTemplate
                 .getForObject(proposicao.getUriAutores(), RetornoApiAutoresProposicao.class).getDados();
 
@@ -155,12 +156,12 @@ public class ProposicaoService {
                     PoliticoCompleto politicoCompleto = this.restTemplate.getForObject(
                             retPolitico.getUri(), RetornoApiPoliticosCompleto.class).dados;
                     if (politicoCompleto != null && politicoCompleto.getId() != null) {
-                        idsAutores.add(politicoCompleto.getId());
+                        politicosAutores.add(politicoCompleto);
                     }
                 }
             });
         }
-        return idsAutores;
+        return politicosAutores;
     }
 
     private ProposicaoCompleto buscarDadosCompletoProposicaoNaApi(RetornoApiSimples uriProposicao) {

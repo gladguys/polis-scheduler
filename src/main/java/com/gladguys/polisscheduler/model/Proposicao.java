@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 @Data
 public class Proposicao {
@@ -34,6 +35,7 @@ public class Proposicao {
     private boolean visualizado;
     private String uriAutores;
     private String urlInteiroTeor;
+    private List<String> nomesAutores;
 
     public void configuraDadosPoliticoNaProposicao(Politico politico) {
         nomePolitico = politico.getNomeEleitoral();
@@ -62,5 +64,9 @@ public class Proposicao {
     public void montaObjetoProposicao(Politico politicoDaProposicao, Tramitacao tramitacaoMaisRecente) {
         this.configuraDadosPoliticoNaProposicao(politicoDaProposicao);
         this.atualizaDadosUltimaTramitacao(tramitacaoMaisRecente);
+    }
+
+    public void setAutores(List<PoliticoCompleto> politicosAutores) {
+        this.nomesAutores = politicosAutores.stream().map(p -> p.getUltimoStatus().getNomeEleitoral()).collect(Collectors.toList());
     }
 }
