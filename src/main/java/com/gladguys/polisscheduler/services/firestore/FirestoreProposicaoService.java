@@ -137,7 +137,7 @@ public class FirestoreProposicaoService {
             return db.collection(ATIVIDADES)
                     .document(politicoProposicao.getPolitico())
                     .collection(ATIVIDADES_POLITICO)
-                    .document(politicoProposicao.getProposicao())
+                    .document(politicoProposicao.getId())
                     .get()
                     .get()
                     .toObject(Proposicao.class);
