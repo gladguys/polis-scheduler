@@ -52,7 +52,7 @@ public class FirestoreDespesaService {
     }
 
     public String salvarDespesa(Despesa despesa) throws ExecutionException, InterruptedException {
-        var despesaId = UUID.randomUUID().toString();
+            var despesaId = UUID.randomUUID().toString();
         db.collection("atividades")
                 .document(despesa.getIdPolitico())
                 .collection("atividadesPolitico")

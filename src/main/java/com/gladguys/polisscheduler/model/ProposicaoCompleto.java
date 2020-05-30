@@ -38,6 +38,7 @@ public class ProposicaoCompleto {
         proposicao.setEmenta(this.ementa);
         proposicao.setDataApresentacao(new SimpleDateFormat("yyyy-MM-dd").format(dataApresentacaoDate).toString());
         proposicao.setDataAtualizacao(proposicao.getDataApresentacao());
+        proposicao.setDataPublicacao(proposicao.getDataApresentacao());
         proposicao.setEmentaDetalhada(this.ementaDetalhada);
         proposicao.setSequencia(1);
         proposicao.setUriAutores(uriAutores);

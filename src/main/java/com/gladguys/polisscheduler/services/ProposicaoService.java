@@ -112,7 +112,7 @@ public class ProposicaoService {
             });
 
             if (politicosComProposicao.size() > 0) {
-                notificacaoFCMService.enviarNotificacaoParaSeguidoresDePoliticos("propostas apresentadas por político", politicosComProposicao);
+            //    notificacaoFCMService.enviarNotificacaoParaSeguidoresDePoliticos("propostas apresentadas por político", politicosComProposicao);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -221,6 +221,7 @@ public class ProposicaoService {
             proposicao.setDescricaoTramitacao(ultimoTramite.getDescricaoTramitacao());
             proposicao.setSequencia(ultimoTramite.getSequencia());
             proposicao.setDataAtualizacao(ultimoTramite.getDataHora());
+            proposicao.setDataPublicacao(ultimoTramite.getDataHora());
 
             firestoreProposicaoService.salvarProposicao(proposicao);
             politicoProposicoesRepository.updateDataAtualizacao(politicoProposicao, ultimoTramite.getDataHora());

@@ -15,6 +15,7 @@ public class Proposicao {
     private String ementa;
     private String dataApresentacao;
     private String dataDocumento;
+    private String dataPublicacao;
     private int sequencia;
     private String descricaoTramitacao;
     private String descricaoSituacao;

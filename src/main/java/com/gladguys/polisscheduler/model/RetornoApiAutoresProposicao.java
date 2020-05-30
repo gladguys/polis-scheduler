@@ -7,5 +7,5 @@ import lombok.Data;
 @Data
 public class RetornoApiAutoresProposicao {
 
-    private List<RetornoApiSimples> dados;
+    private List<AutorProposicao> dados;
 }

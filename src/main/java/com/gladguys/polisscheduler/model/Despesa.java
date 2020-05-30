@@ -37,8 +37,10 @@ public class Despesa {
     private String estadoPolitico;
     private String urlPartidoLogo;
     private boolean visualizado;
+    private String dataPublicacao;
 
-    public void buildData() {
+    public void
+    buildData() {
         DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date dataDocumentoString = null;
 
@@ -51,6 +53,7 @@ public class Despesa {
 
             this.dataAtualizacao = new SimpleDateFormat("yyyy-MM-dd").format(dataDocumentoString).toString();
         }
+        this.dataPublicacao = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
     }
 
     public void montaDespesa(Politico p) {
