@@ -149,4 +149,27 @@ public class FirestoreProposicaoService {
         }
         return null;
     }
+
+    public void updateTotalizadorPLsPolitico(String politicoId) throws Exception {
+
+        try {
+            var queryDocumentSnapshots  = db.collection(ATIVIDADES)
+                    .document(politicoId)
+                    .collection(ATIVIDADES_POLITICO)
+                    .whereEqualTo("descricaoTipo", "Projeto de Lei")
+                    .whereEqualTo(TIPO_ATIVIDADE, PROPOSICAO)
+                    .get()
+                    .get();
+            var qntPls = queryDocumentSnapshots.getDocuments().size();
+
+            firestorePoliticoService.atualizaTotalizadorPLs(politicoId, qntPls);
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

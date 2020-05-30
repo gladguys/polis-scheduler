@@ -107,4 +107,11 @@ public class FirestorePoliticoService {
         while(!update.isDone()){
         }
     }
+
+    public void atualizaTotalizadorPLs(String politicoId, int qntPls) {
+
+        db.collection("politicos")
+                .document(politicoId)
+                .update("totalProposicoes", qntPls);
+    }
 }

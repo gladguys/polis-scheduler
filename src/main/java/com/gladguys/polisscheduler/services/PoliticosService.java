@@ -5,13 +5,13 @@ import com.gladguys.polisscheduler.model.*;
 import com.gladguys.polisscheduler.services.firestore.FirestorePartidoService;
 import com.gladguys.polisscheduler.services.firestore.FirestorePoliticoService;
 
+import com.gladguys.polisscheduler.services.firestore.FirestoreProposicaoService;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 @Service
@@ -23,13 +23,16 @@ public class PoliticosService {
 	private final FirestoreService firestoreService;
 	private final FirestorePoliticoService firestorePoliticoService;
 	private final FirestorePartidoService firestorePartidoService;
+	private final FirestoreProposicaoService firestoreProposicaoService;
+
 
 	public PoliticosService(RestTemplateBuilder restTemplateBuilder, FirestoreService firestoreService,
-							FirestorePoliticoService firestorePoliticoService, FirestorePartidoService firestorePartidoService) {
+							FirestorePoliticoService firestorePoliticoService, FirestorePartidoService firestorePartidoService, FirestoreProposicaoService firestoreProposicaoService) {
 		this.restTemplate = restTemplateBuilder.build();
 		this.firestoreService = firestoreService;
 		this.firestorePoliticoService = firestorePoliticoService;
 		this.firestorePartidoService = firestorePartidoService;
+		this.firestoreProposicaoService = firestoreProposicaoService;
 	}
 
 	public void salvaPoliticos() {
@@ -57,5 +60,16 @@ public class PoliticosService {
 		for (int pos = politicos.size(); pos >= 1; pos--) {
 			firestorePoliticoService.atualizarPosicaoRankingDespesaPolitico(politicos.get(pos-1).getId(), pos);
 		}
+	}
+
+	public void updateTotalizadorPLsPoliticos() throws ExecutionException, InterruptedException {
+		var politicos = firestorePoliticoService.getPoliticos();
+		politicos.forEach(p -> {
+			try {
+				firestoreProposicaoService.updateTotalizadorPLsPolitico(p.getId());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		});
 	}
 }

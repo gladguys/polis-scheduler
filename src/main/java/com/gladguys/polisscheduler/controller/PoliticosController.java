@@ -73,4 +73,14 @@ public class PoliticosController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
 		}
 	}
+
+	@GetMapping(value = "/total-pls")
+	public ResponseEntity<String> atualizaTotalPLsPoliticos() throws ExecutionException, InterruptedException {
+		try {
+			politicosService.updateTotalizadorPLsPoliticos();
+			return ResponseEntity.ok("ranking atualizado");
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+		}
+	}
 }
