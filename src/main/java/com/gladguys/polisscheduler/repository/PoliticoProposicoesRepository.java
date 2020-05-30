@@ -15,11 +15,11 @@ public class PoliticoProposicoesRepository {
 
     final JdbcTemplate template;
 
-    final String INSERT_QUERY = "insert into politico_proposicao (politico, proposicao, atualizacao) values (?, ?, ?)";
-    final String UPDATE_QUERY = "update politico_proposicao set atualizacao = ? where proposicao = ?";
+    final String INSERT_QUERY = "insert into politico_proposicao (id, politico, proposicao, atualizacao) values (?, ?, ?, ?)";
+    final String UPDATE_QUERY = "update politico_proposicao set atualizacao = ? where id = ?";
     final String SELECT_QUERY = "select * from politico_proposicao";
-    final String UPDATE_ATUALIZACAO = "update politico_proposicao SET atualizacao = ? where politico = ? and proposicao = ?;";
-    final String CHECK_IF_EXISTS = "SELECT count(*) FROM politico_proposicao WHERE politico = ? AND proposicao = ?";
+    final String UPDATE_ATUALIZACAO = "update politico_proposicao SET atualizacao = ? where id = ?;";
+    final String CHECK_IF_EXISTS = "SELECT count(*) FROM politico_proposicao WHERE politico = ? AND id = ?";
 
     public PoliticoProposicoesRepository(JdbcTemplate template) {
         this.template = template;
@@ -28,7 +28,7 @@ public class PoliticoProposicoesRepository {
     public int inserirRelacaoPoliticoProposicao(Proposicao proposicao) {
         if (proposicao == null) return -1;
         if (!exists(proposicao))
-            return template.update(INSERT_QUERY, proposicao.getIdPoliticoAutor(), proposicao.getId() + proposicao.getIdPoliticoAutor(), proposicao.getDataAtualizacao());
+            return template.update(INSERT_QUERY, proposicao.getId() + proposicao.getIdPoliticoAutor(), proposicao.getIdPoliticoAutor(), proposicao.getId(), proposicao.getDataAtualizacao());
         else
             return template.update(UPDATE_QUERY, proposicao.getDataAtualizacao(), proposicao.getId() + proposicao.getIdPoliticoAutor());
     }
@@ -43,6 +43,6 @@ public class PoliticoProposicoesRepository {
     }
 
     public void updateDataAtualizacao(PoliticoProposicao politicoProposicao, String dataHora) {
-        template.update(UPDATE_ATUALIZACAO, dataHora, politicoProposicao.getPolitico(), politicoProposicao.getProposicao() + politicoProposicao.getPolitico() );
+        template.update(UPDATE_ATUALIZACAO, dataHora, politicoProposicao.getProposicao() + politicoProposicao.getPolitico() );
     }
 }

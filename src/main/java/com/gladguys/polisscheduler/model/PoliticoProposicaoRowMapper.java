@@ -11,6 +11,7 @@ public class PoliticoProposicaoRowMapper implements RowMapper<PoliticoProposicao
     public PoliticoProposicao mapRow(ResultSet rs, int rowNum) throws SQLException {
 
         PoliticoProposicao pp = new PoliticoProposicao();
+        pp.setId(rs.getString("id"));
         pp.setPolitico(rs.getString("politico"));
         pp.setProposicao(rs.getString("proposicao"));
         pp.setAtualizacao(rs.getString("atualizacao"));

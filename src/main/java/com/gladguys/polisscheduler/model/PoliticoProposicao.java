@@ -5,6 +5,7 @@ import lombok.Data;
 @Data
 public class PoliticoProposicao {
 
+    private String id;
     private String politico;
     private String proposicao;
     private String atualizacao;
