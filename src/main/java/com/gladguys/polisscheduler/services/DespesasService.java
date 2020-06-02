@@ -150,6 +150,11 @@ public class DespesasService {
         this.firestorePoliticoService.zerarTotalizadorDespesas();
     }
 
+    public void resetaTotalizadorDespesasPoliticos() {
+        this.firestorePoliticoService.zerarTotalizadorDespesas();
+        this.firestorePoliticoService.calculaTotalDespesas();
+    }
+
     public String criarDespesaMock() {
         var despesa = new Despesa();
         despesa.setAno("2020");
