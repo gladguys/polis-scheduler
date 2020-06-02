@@ -5,8 +5,7 @@ import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 @Service
@@ -26,7 +25,7 @@ public class FirestoreUsuariosService {
                     .collection("usuariosSeguindo")
                     .get().get().getDocuments();
 
-            for (var doc: documents) {
+            for (var doc : documents) {
                 usuarios.add(doc.toObject(Usuario.class));
             }
         } catch (InterruptedException e) {
@@ -35,5 +34,26 @@ public class FirestoreUsuariosService {
             e.printStackTrace();
         }
         return usuarios;
+    }
+
+    public Set<Usuario> getTodosUsuarios() {
+        Set<Usuario> usuarios = new HashSet<>();
+
+        try {
+            List<QueryDocumentSnapshot> users = db.collection("users").get().get().getDocuments();
+
+            for (var doc : users) {
+                usuarios.add(doc.toObject(Usuario.class));
+            }
+
+            return usuarios;
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 }

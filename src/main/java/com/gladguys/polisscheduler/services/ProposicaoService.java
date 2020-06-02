@@ -113,7 +113,7 @@ public class ProposicaoService {
             });
 
             if (politicosComProposicao.size() > 0) {
-            //    notificacaoFCMService.enviarNotificacaoParaSeguidoresDePoliticos("propostas apresentadas por político", politicosComProposicao);
+                notificacaoFCMService.enviarNotificacaoParaSeguidoresDePoliticos("propostas apresentadas por político", politicosComProposicao);
             }
         } catch (Exception e) {
             e.printStackTrace();

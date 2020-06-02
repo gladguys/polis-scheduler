@@ -2,6 +2,7 @@ package com.gladguys.polisscheduler.services;
 
 import com.gladguys.polisscheduler.builder.PoliticoBuilder;
 import com.gladguys.polisscheduler.model.*;
+import com.gladguys.polisscheduler.repository.PoliticoRepository;
 import com.gladguys.polisscheduler.services.firestore.FirestorePartidoService;
 import com.gladguys.polisscheduler.services.firestore.FirestorePoliticoService;
 
@@ -24,15 +25,21 @@ public class PoliticosService {
 	private final FirestorePoliticoService firestorePoliticoService;
 	private final FirestorePartidoService firestorePartidoService;
 	private final FirestoreProposicaoService firestoreProposicaoService;
+	private final PoliticoRepository politicoRepository;
 
 
-	public PoliticosService(RestTemplateBuilder restTemplateBuilder, FirestoreService firestoreService,
-							FirestorePoliticoService firestorePoliticoService, FirestorePartidoService firestorePartidoService, FirestoreProposicaoService firestoreProposicaoService) {
+	public PoliticosService(RestTemplateBuilder restTemplateBuilder,
+							FirestoreService firestoreService,
+							FirestorePoliticoService firestorePoliticoService,
+							FirestorePartidoService firestorePartidoService,
+							FirestoreProposicaoService firestoreProposicaoService,
+							PoliticoRepository politicoRepository) {
 		this.restTemplate = restTemplateBuilder.build();
 		this.firestoreService = firestoreService;
 		this.firestorePoliticoService = firestorePoliticoService;
 		this.firestorePartidoService = firestorePartidoService;
 		this.firestoreProposicaoService = firestoreProposicaoService;
+		this.politicoRepository = politicoRepository;
 	}
 
 	public void salvaPoliticos() {
@@ -40,6 +47,7 @@ public class PoliticosService {
 		List<PoliticoSimples> politicos = this.restTemplate.getForObject(url, RetornoApiPoliticosSimples.class).dados;
 		politicos.forEach(this::salvaPolitico);
 		this.firestoreService.updateHashCodeSyncPoliticos();
+
 	}
 
 	private void salvaPolitico(PoliticoSimples ps) {

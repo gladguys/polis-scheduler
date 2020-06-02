@@ -52,38 +52,44 @@ public class DespesasService {
         int numeroMes = mes != null ? mes : DataUtil.getNumeroMes();
         int numeroAno = ano != null ? ano : DataUtil.getNumeroAno();
 
-        politicos.parallelStream().forEach(p -> {
-            String urlParaDespesasPoliticoMesVigente =
-                    URI_POLITICOS + p.getId() + "/despesas?ano=" + numeroAno + "&mes=" + numeroMes + "&ordem=ASC&ordenarPor=ano";
-            List<Despesa> despesasDoMesVigente = this.restTemplate
-                    .getForObject(urlParaDespesasPoliticoMesVigente, RetornoDespesas.class).getDados();
+        try {
+            politicos.parallelStream().forEach(p -> {
+                String urlParaDespesasPoliticoMesVigente =
+                        URI_POLITICOS + p.getId() + "/despesas?ano=" + numeroAno + "&mes=" + numeroMes + "&ordem=ASC&ordenarPor=ano";
+                List<Despesa> despesasDoMesVigente = this.restTemplate
+                        .getForObject(urlParaDespesasPoliticoMesVigente, RetornoDespesas.class).getDados();
 
-            String urlParaDespesasPoliticoMesPassado= getUrlParaDespesasPoliticoMesAnterior(numeroMes, numeroAno, p);
-            List<Despesa> despesasMesPassado = this.restTemplate
-                    .getForObject(urlParaDespesasPoliticoMesPassado, RetornoDespesas.class).getDados();
+                String urlParaDespesasPoliticoMesPassado = getUrlParaDespesasPoliticoMesAnterior(numeroMes, numeroAno, p);
+                List<Despesa> despesasMesPassado = this.restTemplate
+                        .getForObject(urlParaDespesasPoliticoMesPassado, RetornoDespesas.class).getDados();
 
-            despesasDoMesVigente.addAll(despesasMesPassado);
+                despesasDoMesVigente.addAll(despesasMesPassado);
 
-            despesasDoMesVigente.forEach(d -> d.montaDespesa(p));
+                despesasDoMesVigente
+                        .stream()
+                        .filter(d -> d.getDataDocumento() != null)
+                        .forEach(d -> d.montaDespesa(p));
 
-            var despesasNovas = despesasDoMesVigente
-                    .stream()
-                    .filter(d -> d.getDataDocumento() != null)
-                    .filter(this::ehNovaDespesa).collect(Collectors.toList());
+                var despesasNovas = despesasDoMesVigente
+                        .stream()
+                        .filter(d -> d.getDataDocumento() != null)
+                        .filter(this::ehNovaDespesa).collect(Collectors.toList());
 
-            despesasNovas.forEach(d -> {
-                try {
-                    firestoreService.salvarDespesa(d);
-                    politicosComDespesaNova.add(p.getId());
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                despesasNovas.forEach(d -> {
+                    try {
+                        firestoreService.salvarDespesa(d);
+                        politicosComDespesaNova.add(p.getId());
+                    } catch (ExecutionException e) {
+                        e.printStackTrace();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+
+                    }
+                });
             });
-        });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         if (politicosComDespesaNova.size() > 0) {
             notificacaoFCMService.enviarNotificacaoParaSeguidoresDePoliticos(
@@ -123,10 +129,15 @@ public class DespesasService {
                     .map(d -> new BigDecimal(d.getValorLiquido()))
                     .reduce((v1, v2) -> v1.add(v2));
 
-            firestoreService.salvarTotalDespesaPoliticoPorMes(politico.getId(), ano, mes, valorMes.orElse(new BigDecimal(0.0)));
-            firestorePoliticoService.atualizarTotalizadorDespesaPolitico(politico.getId(), valorMes.orElse(new BigDecimal(0.0)));
+            try {
+                firestoreService.salvarTotalDespesaPoliticoPorMes(politico.getId(), ano, mes, valorMes.orElse(new BigDecimal(0.0)));
+                firestorePoliticoService.atualizarTotalizadorDespesaPolitico(politico.getId(), valorMes.orElse(new BigDecimal(0.0)));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
         });
+        notificacaoFCMService.enviarNotificacaoTotalDespesasAtualizado();
     }
 
     private String montaUrlParaDespesasPolitico(String ano, String mes, Politico politico) {
