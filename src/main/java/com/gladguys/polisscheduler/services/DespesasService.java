@@ -117,27 +117,32 @@ public class DespesasService {
 
     public void totalizadorDespesasPorAnoEmes(String ano, String mes) throws ExecutionException, InterruptedException {
 
-        //pega todos os deputados da base
-        List<Politico> politicos = firestorePoliticoService.getPoliticos();
-        politicos.parallelStream().forEach(politico -> {
-            String urlParaDespesasPolitico = montaUrlParaDespesasPolitico(ano, mes, politico);
+       try {
+           //pega todos os deputados da base
+           List<Politico> politicos = firestorePoliticoService.getPoliticos();
+           politicos.parallelStream().forEach(politico -> {
+               String urlParaDespesasPolitico = montaUrlParaDespesasPolitico(ano, mes, politico);
 
-            List<Despesa> despesas = this.restTemplate
-                    .getForObject(urlParaDespesasPolitico, RetornoDespesas.class).getDados();
+               List<Despesa> despesas = this.restTemplate
+                       .getForObject(urlParaDespesasPolitico, RetornoDespesas.class).getDados();
 
-            Optional<BigDecimal> valorMes = despesas.parallelStream()
-                    .map(d -> new BigDecimal(d.getValorLiquido()))
-                    .reduce((v1, v2) -> v1.add(v2));
+               Optional<BigDecimal> valorMes = despesas.parallelStream()
+                       .map(d -> new BigDecimal(d.getValorLiquido()))
+                       .reduce((v1, v2) -> v1.add(v2));
 
-            try {
-                firestoreService.salvarTotalDespesaPoliticoPorMes(politico.getId(), ano, mes, valorMes.orElse(new BigDecimal(0.0)));
-                firestorePoliticoService.atualizarTotalizadorDespesaPolitico(politico.getId(), valorMes.orElse(new BigDecimal(0.0)));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+               try {
+                   firestoreService.salvarTotalDespesaPoliticoPorMes(politico.getId(), ano, mes, valorMes.orElse(new BigDecimal(0.0)));
+                   firestorePoliticoService.atualizarTotalizadorDespesaPolitico(politico.getId(), valorMes.orElse(new BigDecimal(0.0)));
+               } catch (Exception e) {
+                   e.printStackTrace();
+               }
 
-        });
-        notificacaoFCMService.enviarNotificacaoTotalDespesasAtualizado();
+           });
+           //  notificacaoFCMService.enviarNotificacaoTotalDespesasAtualizado();
+       } catch (Exception e) {
+           e.printStackTrace();
+           throw e;
+       }
     }
 
     private String montaUrlParaDespesasPolitico(String ano, String mes, Politico politico) {
@@ -152,7 +157,7 @@ public class DespesasService {
 
     public void resetaTotalizadorDespesasPoliticos() {
         this.firestorePoliticoService.zerarTotalizadorDespesas();
-        this.firestorePoliticoService.calculaTotalDespesas();
+        //TODO: this.firestorePoliticoService.calculaTotalDespesas();
     }
 
     public String criarDespesaMock() {

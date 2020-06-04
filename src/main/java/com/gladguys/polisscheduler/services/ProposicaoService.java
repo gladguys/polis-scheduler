@@ -94,7 +94,7 @@ public class ProposicaoService {
                 var tramitacoes = getTramitacoesDaAPI(proposicao.getId(), data);
                 var politicosAutores = getPoliticosAutorDaProposicao(proposicao);
                 proposicao.setAutores(politicosAutores);
-                        politicosAutores.forEach(politico -> {
+                politicosAutores.forEach(politico -> {
 
                     proposicao.setIdPoliticoAutor(politico.getId());
                     Proposicao proposicaoSalva = salvarProposicaoNoFirestore(proposicao, tramitacoes);
@@ -205,10 +205,11 @@ public class ProposicaoService {
 
     private void atualizaTramitacao(PoliticoProposicao politicoProposicao, String data) {
         List<Tramitacao> tramitacoesNovas = getTramitacoesDaAPI(politicoProposicao.getProposicao(), data);
-        var tramiteNovoMaisRecente =
-                Collections.max(tramitacoesNovas, Comparator.comparing(Tramitacao::getSequencia));
-        firestoreProposicaoService.salvarTramitacoesProposicao(tramitacoesNovas, politicoProposicao.getProposicao());
-        atualizarProposicaoComNovasTramitacoes(politicoProposicao, tramiteNovoMaisRecente);
+        if (tramitacoesNovas != null) {
+            var tramiteNovoMaisRecente = Collections.max(tramitacoesNovas, Comparator.comparing(Tramitacao::getSequencia));
+            firestoreProposicaoService.salvarTramitacoesProposicao(tramitacoesNovas, politicoProposicao.getProposicao());
+            atualizarProposicaoComNovasTramitacoes(politicoProposicao, tramiteNovoMaisRecente);
+        }
     }
 
     private void atualizarProposicaoComNovasTramitacoes(PoliticoProposicao politicoProposicao, Tramitacao ultimoTramite) {
@@ -230,8 +231,17 @@ public class ProposicaoService {
     }
 
     private List<Tramitacao> getTramitacoesDaAPI(String proposicaoId, String data) {
-        return this.restTemplate.getForObject(
-                URI_PROPOSICAO + "/" + proposicaoId + "/tramitacoes?dataFim=" + data,
-                RetornoApiTramitacoes.class).dados;
+        try {
+            RetornoApiTramitacoes retorno = this.restTemplate.getForObject(
+                    URI_PROPOSICAO + "/" + proposicaoId + "/tramitacoes?dataFim=" + data,
+                    RetornoApiTramitacoes.class);
+
+            if (retorno != null)
+                return retorno.dados;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

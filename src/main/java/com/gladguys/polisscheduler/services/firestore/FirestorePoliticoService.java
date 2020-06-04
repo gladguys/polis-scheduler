@@ -35,7 +35,8 @@ public class FirestorePoliticoService {
         for (DocumentSnapshot document : documents) {
             politicos.add(document.toObject(Politico.class));
         }
-        System.out.println("quantidade politicos: " + politicos.size());;
+        System.out.println("quantidade politicos: " + politicos.size());
+        ;
         return politicos;
     }
 
@@ -104,7 +105,7 @@ public class FirestorePoliticoService {
         ApiFuture<WriteResult> update = db.collection("politicos")
                 .document(politicoId)
                 .update("rankingPosDespesa", pos);
-        while(!update.isDone()){
+        while (!update.isDone()) {
         }
     }
 
@@ -112,9 +113,5 @@ public class FirestorePoliticoService {
         db.collection("politicos")
                 .document(politicoId)
                 .update("totalProposicoes", qntPls);
-    }
-
-    public void calculaTotalDespesas() {
-
     }
 }

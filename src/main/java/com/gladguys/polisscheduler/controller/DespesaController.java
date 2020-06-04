@@ -22,9 +22,21 @@ public class DespesaController {
     public ResponseEntity<String> salvaTotalizadorDespesasPor(@PathVariable("ano") String ano, @PathVariable("mes") String mes) {
         try {
             despesasService.totalizadorDespesasPorAnoEmes(ano, mes);
-            return ResponseEntity.ok("Despepsas do mes salvas com sucesso");
+            return ResponseEntity.ok("Despesas do mes salvas com sucesso");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+
+    @GetMapping("/totalizador/resetar")
+    public ResponseEntity<String> resetarTotalizador() {
+        try {
+            despesasService.resetaTotalizadorDespesasPoliticos();
+            return ResponseEntity.ok("Resetado com sucesso");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+
 }
