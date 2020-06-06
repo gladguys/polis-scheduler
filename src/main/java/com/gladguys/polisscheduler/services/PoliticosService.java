@@ -14,6 +14,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 @Service
 public class PoliticosService {
@@ -62,12 +63,29 @@ public class PoliticosService {
 	}
 
     public void atualizarRankingDespesas() throws ExecutionException, InterruptedException {
+		var resultadoRanking = new ResultadoRanking();
+
 		List<Politico> politicos = this.firestorePoliticoService.getPoliticos();
 		politicos.sort(Comparator.comparing(p -> p.getTotalDespesas()));
 
-		for (int pos = politicos.size(); pos >= 1; pos--) {
-			firestorePoliticoService.atualizarPosicaoRankingDespesaPolitico(politicos.get(pos-1).getId(), pos);
+		List<Politico> politicosMenosGasto =
+				politicos.stream().filter(p -> p.getTotalDespesas().equals(0.0)).collect(Collectors.toList());
+
+		if (politicosMenosGasto.size() > 0) {
+			resultadoRanking.setDadosPoliticoPrimeiro(List.of(politicos.get(0)));
+		} else {
+			resultadoRanking.setDadosPoliticoPrimeiro(politicosMenosGasto);
 		}
+		resultadoRanking.setDadosPoliticoUltimo(politicos.get(politicos.size()-1));
+
+		Double totalDespesasTodosPoliticos = politicos.stream().map(Politico::getTotalDespesas).reduce(Double::sum).get();
+		resultadoRanking.setDespesaMedia(totalDespesasTodosPoliticos/politicos.size());
+
+		//for (int pos = politicos.size(); pos >= 1; pos--) {
+		//	firestorePoliticoService.atualizarPosicaoRankingDespesaPolitico(politicos.get(pos-1).getId(), pos);
+		//}
+
+		firestorePoliticoService.salvarResultadosRanking(resultadoRanking);
 	}
 
 	public void updateTotalizadorPLsPoliticos() throws ExecutionException, InterruptedException {

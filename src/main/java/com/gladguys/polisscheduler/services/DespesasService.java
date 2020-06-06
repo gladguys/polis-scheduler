@@ -118,7 +118,6 @@ public class DespesasService {
     public void totalizadorDespesasPorAnoEmes(String ano, String mes) throws ExecutionException, InterruptedException {
 
        try {
-           //pega todos os deputados da base
            List<Politico> politicos = firestorePoliticoService.getPoliticos();
            politicos.parallelStream().forEach(politico -> {
                String urlParaDespesasPolitico = montaUrlParaDespesasPolitico(ano, mes, politico);
@@ -138,7 +137,7 @@ public class DespesasService {
                }
 
            });
-           //  notificacaoFCMService.enviarNotificacaoTotalDespesasAtualizado();
+             notificacaoFCMService.enviarNotificacaoTotalDespesasAtualizado();
        } catch (Exception e) {
            e.printStackTrace();
            throw e;
