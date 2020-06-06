@@ -115,7 +115,6 @@ public class FirestorePoliticoService {
     }
 
     public void salvarResultadosRanking(ResultadoRanking resultadoRanking) {
-
         db.collection("resultados_ranking").document("ranking").set(resultadoRanking);
     }
 }

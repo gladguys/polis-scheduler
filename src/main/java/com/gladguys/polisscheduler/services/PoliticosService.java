@@ -72,9 +72,9 @@ public class PoliticosService {
 				politicos.stream().filter(p -> p.getTotalDespesas().equals(0.0)).collect(Collectors.toList());
 
 		if (politicosMenosGasto.size() > 0) {
-			resultadoRanking.setDadosPoliticoPrimeiro(List.of(politicos.get(0)));
-		} else {
 			resultadoRanking.setDadosPoliticoPrimeiro(politicosMenosGasto);
+		} else {
+			resultadoRanking.setDadosPoliticoPrimeiro(List.of(politicos.get(0)));
 		}
 		resultadoRanking.setDadosPoliticoUltimo(politicos.get(politicos.size()-1));
 

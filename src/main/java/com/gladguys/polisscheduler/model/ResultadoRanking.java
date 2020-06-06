@@ -3,21 +3,22 @@ package com.gladguys.polisscheduler.model;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
 public class ResultadoRanking {
-    private List<String> nomesPoliticoPrimeiro;
+    private List<String> nomesPoliticoPrimeiro = new ArrayList<>();
     private String nomePoliticoUltimo;
-    private List<String> fotosPoliticoPrimeiro;
+    private List<String> fotosPoliticoPrimeiro = new ArrayList<>();
     private String fotoPoliticoUltimo;
-    private List<String> partidosPoliticoPrimeiro;
+    private List<String> partidosPoliticoPrimeiro = new ArrayList<>();
     private String partidoPoliticoUltimo;
-    private List<String> estadosPoliticoPrimeiro;
+    private List<String> estadosPoliticoPrimeiro = new ArrayList<>();
     private String estadoPoliticoUltimo;
-    private List<String> logosPartidoPoliticoPrimeiro;
+    private List<String> logosPartidoPoliticoPrimeiro = new ArrayList<>();
     private String logoPartidoPoliticoUltimo;
-    private List<Double> despesasPoliticoPrimeiro;
+    private List<Double> despesasPoliticoPrimeiro = new ArrayList<>();
     private Double despesaPoliticoUltimo;
     private Double despesaMedia;
 
