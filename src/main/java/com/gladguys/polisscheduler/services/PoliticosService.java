@@ -81,9 +81,9 @@ public class PoliticosService {
 		Double totalDespesasTodosPoliticos = politicos.stream().map(Politico::getTotalDespesas).reduce(Double::sum).get();
 		resultadoRanking.setDespesaMedia(totalDespesasTodosPoliticos/politicos.size());
 
-		//for (int pos = politicos.size(); pos >= 1; pos--) {
-		//	firestorePoliticoService.atualizarPosicaoRankingDespesaPolitico(politicos.get(pos-1).getId(), pos);
-		//}
+		for (int pos = politicos.size(); pos >= 1; pos--) {
+			firestorePoliticoService.atualizarPosicaoRankingDespesaPolitico(politicos.get(pos-1).getId(), pos);
+		}
 
 		firestorePoliticoService.salvarResultadosRanking(resultadoRanking);
 	}
