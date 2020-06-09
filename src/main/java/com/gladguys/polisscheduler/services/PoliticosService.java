@@ -63,7 +63,7 @@ public class PoliticosService {
 	}
 
     public void atualizarRankingDespesas() throws ExecutionException, InterruptedException {
-		var resultadoRanking = new ResultadoRanking();
+		var resultadoRanking = new ResultadoRankingDespesas();
 
 		List<Politico> politicos = this.firestorePoliticoService.getPoliticos();
 		politicos.sort(Comparator.comparing(p -> p.getTotalDespesas()));

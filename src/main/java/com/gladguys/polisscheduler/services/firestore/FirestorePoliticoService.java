@@ -1,13 +1,12 @@
 package com.gladguys.polisscheduler.services.firestore;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 import com.gladguys.polisscheduler.model.Partido;
 import com.gladguys.polisscheduler.model.Politico;
-import com.gladguys.polisscheduler.model.ResultadoRanking;
+import com.gladguys.polisscheduler.model.ResultadoRankingDespesas;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.*;
 
@@ -114,7 +113,7 @@ public class FirestorePoliticoService {
                 .update("totalProposicoes", qntPls);
     }
 
-    public void salvarResultadosRanking(ResultadoRanking resultadoRanking) {
-        db.collection("resultados_ranking").document("ranking").set(resultadoRanking);
+    public void salvarResultadosRanking(ResultadoRankingDespesas resultadoRankingDespesas) {
+        db.collection("resultados_ranking").document("ranking").set(resultadoRankingDespesas);
     }
 }

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class ResultadoRanking {
+public class ResultadoRankingDespesas {
     private List<String> nomesPoliticoPrimeiro = new ArrayList<>();
     private String nomePoliticoUltimo;
     private List<String> fotosPoliticoPrimeiro = new ArrayList<>();
