@@ -6,7 +6,7 @@ import java.util.concurrent.ExecutionException;
 
 import com.gladguys.polisscheduler.model.Partido;
 import com.gladguys.polisscheduler.model.Politico;
-import com.gladguys.polisscheduler.model.ComparacaoPosicaoDespesas;
+import com.gladguys.polisscheduler.model.ComparativoRankingDespesas;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.*;
 
@@ -113,7 +113,7 @@ public class FirestorePoliticoService {
                 .update("totalProposicoes", qntPls);
     }
 
-    public void salvarResultadosRanking(ComparacaoPosicaoDespesas comparacaoPosicaoDespesas) {
-        db.collection("resultados_ranking").document("ranking").set(comparacaoPosicaoDespesas);
+    public void salvarResultadosRanking(ComparativoRankingDespesas comparativoRankingDespesas) {
+        db.collection("resultados_ranking").document("ranking").set(comparativoRankingDespesas);
     }
 }
