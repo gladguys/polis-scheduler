@@ -21,8 +21,8 @@ public class PolisSchedulerApplication {
 	static String ENV = "dev";
 
 	public static void main(String[] args) throws IOException {
-		if (args.length == 0 || !args[0].equals("dev")) ENV = "prod";
-		else ENV = "dev";
+		if (args.length == 0 || !args[0].equals("dev")) ENV = "dev";
+		else ENV = "prod";
 		
 			SpringApplication.run(PolisSchedulerApplication.class, args);
 	}
