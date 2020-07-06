@@ -1,5 +1,6 @@
 package com.gladguys.polisscheduler.services;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -191,7 +192,7 @@ public class ProposicaoService {
         return retSimplesProposicoes;
     }
 
-    public void atualizaTramitacoes(String dataInformada) {
+    public void atualizaTramitacoes(String dataInformada) throws IOException {
         String dataBusca;
         if (dataInformada == null) {
             dataBusca = DataUtil.getDataOntem();
@@ -199,36 +200,59 @@ public class ProposicaoService {
             dataBusca = dataInformada;
         }
         List<PoliticoProposicao> politicoProposicoes = politicoProposicoesRepository.getTodos();
-        politicoProposicoes.forEach(p -> atualizaTramitacao(p, dataBusca));
+        int porcentagemAtual = 0;
+        int porcentagemAntiga = -1;
 
+        for (int i = 0; i < politicoProposicoes.size(); i++) {
+            if (porcentagemAntiga != porcentagemAtual) {
+                Runtime.getRuntime().exec("clear");
+                System.out.print("Proposições Processadas: " + porcentagemAtual + "% [");
+                for (int j = 0; j < 100; j++) {
+                    if (j >= porcentagemAtual) System.out.print(" ");
+                    else System.out.print("|");
+                }
+                System.out.println("] " + (i+1) + "/" + politicoProposicoes.size());
+                porcentagemAntiga = porcentagemAtual;
+            }
+
+            atualizaTramitacao(politicoProposicoes.get(i), dataBusca);
+            porcentagemAtual = ((i + 1) * 100) / politicoProposicoes.size();
+        }
     }
 
     private void atualizaTramitacao(PoliticoProposicao politicoProposicao, String data) {
-        List<Tramitacao> tramitacoesNovas = getTramitacoesDaAPI(politicoProposicao.getProposicao(), data);
-        if (tramitacoesNovas != null) {
-            var tramiteNovoMaisRecente = Collections.max(tramitacoesNovas, Comparator.comparing(Tramitacao::getSequencia));
-            firestoreProposicaoService.salvarTramitacoesProposicao(tramitacoesNovas, politicoProposicao.getProposicao());
-            atualizarProposicaoComNovasTramitacoes(politicoProposicao, tramiteNovoMaisRecente);
+        try {
+            List<Tramitacao> tramitacoesNovas = getTramitacoesDaAPI(politicoProposicao.getProposicao(), data);
+            if (tramitacoesNovas != null) {
+                var tramiteNovoMaisRecente = Collections.max(tramitacoesNovas, Comparator.comparing(Tramitacao::getSequencia));
+
+                if (politicoProposicao.estaDesatualizado(tramiteNovoMaisRecente)) {
+                    firestoreProposicaoService.salvarTramitacoesProposicao(tramitacoesNovas, politicoProposicao.getProposicao());
+                    atualizarProposicaoComNovasTramitacoes(politicoProposicao, tramiteNovoMaisRecente);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("ERROR quando tentando atualizar tramitação para proposição " + politicoProposicao.getProposicao());
         }
     }
 
     private void atualizarProposicaoComNovasTramitacoes(PoliticoProposicao politicoProposicao, Tramitacao ultimoTramite) {
-        if (politicoProposicao.estaDesatualizado(ultimoTramite)) {
-            Proposicao proposicao = firestoreProposicaoService.getById(politicoProposicao);
 
-            proposicao.setFoiAtualizada(true);
-            proposicao.setVisualizado(false);
-            proposicao.setDescricaoSituacao(ultimoTramite.getDescricaoSituacao());
-            proposicao.setDespacho(ultimoTramite.getDespacho());
-            proposicao.setDescricaoTramitacao(ultimoTramite.getDescricaoTramitacao());
-            proposicao.setSequencia(ultimoTramite.getSequencia());
-            proposicao.setDataAtualizacao(ultimoTramite.getDataHora());
-            proposicao.setDataPublicacao(ultimoTramite.getDataHora());
+        Proposicao proposicao = firestoreProposicaoService.getById(politicoProposicao);
 
-            firestoreProposicaoService.salvarProposicao(proposicao);
-            politicoProposicoesRepository.updateDataAtualizacao(politicoProposicao, ultimoTramite.getDataHora());
-        }
+        proposicao.setFoiAtualizada(true);
+        proposicao.setVisualizado(false);
+        proposicao.setDescricaoSituacao(ultimoTramite.getDescricaoSituacao());
+        proposicao.setDespacho(ultimoTramite.getDespacho());
+        proposicao.setDescricaoTramitacao(ultimoTramite.getDescricaoTramitacao());
+        proposicao.setSequencia(ultimoTramite.getSequencia());
+        proposicao.setDataAtualizacao(ultimoTramite.getDataHora());
+        proposicao.setDataPublicacao(ultimoTramite.getDataHora());
+
+        firestoreProposicaoService.salvarProposicao(proposicao);
+        politicoProposicoesRepository.updateDataAtualizacao(politicoProposicao, ultimoTramite.getDataHora());
     }
+
 
     private List<Tramitacao> getTramitacoesDaAPI(String proposicaoId, String data) {
         try {
