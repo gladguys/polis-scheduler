@@ -35,13 +35,16 @@ public class FirestoreUsuariosService {
     public boolean haPermissaoParaNotificacao(String usuarioId) {
         try {
             Usuario usuario = db.collection("users").document(usuarioId).get().get().toObject(Usuario.class);
-            return usuario.isNotificationEnabled();
+            if (usuario.getUserConfigs() != null && usuario.getUserConfigs().get("isNotificationEnabled") != null) {
+                return (Boolean) usuario.getUserConfigs().get("isNotificationEnabled");
+            }
+
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
             e.printStackTrace();
         }
-        return false;
+        return true;
     }
 
     public Set<Usuario> getTodosUsuarios() {
