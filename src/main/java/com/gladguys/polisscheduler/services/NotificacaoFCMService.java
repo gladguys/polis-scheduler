@@ -71,7 +71,7 @@ public class NotificacaoFCMService {
     private void enviarNotificacaoUpdateTotalDespesa(String userToken) {
 
         String titulo = "Total de despesas atualizado!";
-        String body = "Os totais de despesas para cada político foram atualizados até o mês de maio.";
+        String body = "Os totais de despesas para cada político foram atualizados o último mês.";
 
         Message message = Message.builder()
                 .setAndroidConfig(AndroidConfig.builder()
