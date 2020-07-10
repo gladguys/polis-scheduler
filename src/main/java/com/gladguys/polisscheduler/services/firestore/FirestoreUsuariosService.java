@@ -18,7 +18,6 @@ public class FirestoreUsuariosService {
     }
 
     public List<QueryDocumentSnapshot> getUsuarioSeguidoresQueryDocSnapshot(String politicoId) {
-        List<Usuario> usuarios = new ArrayList<>();
         try {
             List<QueryDocumentSnapshot> documents = db.collection("usuarios_seguindo")
                     .document(politicoId)
@@ -30,7 +29,7 @@ public class FirestoreUsuariosService {
         } catch (ExecutionException e) {
             e.printStackTrace();
         }
-        return usuarios;
+        return null;
     }
 
     public boolean haPermissaoParaNotificacao(String usuarioId) {

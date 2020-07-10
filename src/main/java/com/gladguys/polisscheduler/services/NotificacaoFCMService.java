@@ -24,13 +24,16 @@ public class NotificacaoFCMService {
     public void enviarNotificacaoParaSeguidoresDePoliticos(String tipoNotificacao, Set<String> politicosIds) {
         Set<Usuario> usuariosPorPoliticosIds = getUsuariosPorPoliticosIds(politicosIds);
         if (usuariosPorPoliticosIds != null) {
-            usuariosPorPoliticosIds.stream()
-                    .filter(p -> firestoreUsuariosService.haPermissaoParaNotificacao())
-                    .map(u -> u.getFcmToken()).distinct().forEach(userToken -> {
-                if (userToken != null) {
-                    enviarNotificacao(userToken, tipoNotificacao);
-                }
-            });
+            usuariosPorPoliticosIds
+                    .stream()
+                    .filter(u -> firestoreUsuariosService.haPermissaoParaNotificacao(u.getId()))
+                    .map(u -> u.getFcmToken())
+                    .distinct()
+                    .forEach(userToken -> {
+                        if (userToken != null) {
+                            enviarNotificacao(userToken, tipoNotificacao);
+                        }
+                    });
         }
     }
 
@@ -107,14 +110,17 @@ public class NotificacaoFCMService {
         Set<Usuario> usuarios = new HashSet<>();
         politicosIds.forEach(pId -> {
             List<QueryDocumentSnapshot> queryDocsSnapshot = firestoreUsuariosService.getUsuarioSeguidoresQueryDocSnapshot(pId);
-            List<Usuario> usuariosSeguidoresDoPolitico =
-                    queryDocsSnapshot
-                            .stream()
-                            .map(queryDocumentSnapshot ->
-                                UsuarioBuilder.buildUsuarioDeQueryDocumentSnapshot(queryDocumentSnapshot))
-                            .collect(Collectors.toList());
 
-            usuarios.addAll(usuariosSeguidoresDoPolitico);
+            if (queryDocsSnapshot != null) {
+                List<Usuario> usuariosSeguidoresDoPolitico =
+                        queryDocsSnapshot
+                                .stream()
+                                .map(queryDocumentSnapshot ->
+                                        UsuarioBuilder.buildUsuarioDeQueryDocumentSnapshot(queryDocumentSnapshot))
+                                .collect(Collectors.toList());
+
+                usuarios.addAll(usuariosSeguidoresDoPolitico);
+            }
         });
         return usuarios;
     }
