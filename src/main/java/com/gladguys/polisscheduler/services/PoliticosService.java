@@ -48,7 +48,6 @@ public class PoliticosService {
 		List<PoliticoSimples> politicos = this.restTemplate.getForObject(url, RetornoApiPoliticosSimples.class).dados;
 		politicos.forEach(this::salvaPolitico);
 		this.firestoreService.updateHashCodeSyncPoliticos();
-
 	}
 
 	private void salvaPolitico(PoliticoSimples ps) {
@@ -84,7 +83,6 @@ public class PoliticosService {
 		for (int pos = politicos.size(); pos >= 1; pos--) {
 			firestorePoliticoService.atualizarPosicaoRankingDespesaPolitico(politicos.get(pos-1).getId(), pos);
 		}
-
 		firestorePoliticoService.salvarResultadosRanking(resultadoRanking);
 	}
 
