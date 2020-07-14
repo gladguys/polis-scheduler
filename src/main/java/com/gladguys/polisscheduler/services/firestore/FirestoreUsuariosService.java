@@ -17,23 +17,34 @@ public class FirestoreUsuariosService {
         this.db = db;
     }
 
-    public List<Usuario> getUsuariosSeguidoresDoPolitico(String politicoId) {
-        List<Usuario> usuarios = new ArrayList<>();
+    public List<QueryDocumentSnapshot> getUsuarioSeguidoresQueryDocSnapshot(String politicoId) {
         try {
             List<QueryDocumentSnapshot> documents = db.collection("usuarios_seguindo")
                     .document(politicoId)
                     .collection("usuariosSeguindo")
                     .get().get().getDocuments();
-
-            for (var doc : documents) {
-                usuarios.add(doc.toObject(Usuario.class));
-            }
+            return documents;
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
             e.printStackTrace();
         }
-        return usuarios;
+        return null;
+    }
+
+    public boolean haPermissaoParaNotificacao(String usuarioId) {
+        try {
+            Usuario usuario = db.collection("users").document(usuarioId).get().get().toObject(Usuario.class);
+            if (usuario.getUserConfigs() != null && usuario.getUserConfigs().get("isNotificationEnabled") != null) {
+                return (Boolean) usuario.getUserConfigs().get("isNotificationEnabled");
+            }
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        return true;
     }
 
     public Set<Usuario> getTodosUsuarios() {

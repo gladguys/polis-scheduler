@@ -1,12 +1,16 @@
 package com.gladguys.polisscheduler.services;
 
+import com.gladguys.polisscheduler.builder.UsuarioBuilder;
 import com.gladguys.polisscheduler.model.Usuario;
 import com.gladguys.polisscheduler.services.firestore.FirestoreUsuariosService;
+import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.firebase.messaging.*;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class NotificacaoFCMService {
@@ -20,11 +24,16 @@ public class NotificacaoFCMService {
     public void enviarNotificacaoParaSeguidoresDePoliticos(String tipoNotificacao, Set<String> politicosIds) {
         Set<Usuario> usuariosPorPoliticosIds = getUsuariosPorPoliticosIds(politicosIds);
         if (usuariosPorPoliticosIds != null) {
-            usuariosPorPoliticosIds.stream().map(u -> u.getFcmToken()).distinct().forEach(userToken -> {
-                if (userToken != null) {
-                    enviarNotificacao(userToken, tipoNotificacao);
-                }
-            });
+            usuariosPorPoliticosIds
+                    .stream()
+                    .filter(u -> firestoreUsuariosService.haPermissaoParaNotificacao(u.getId()))
+                    .map(u -> u.getFcmToken())
+                    .distinct()
+                    .forEach(userToken -> {
+                        if (userToken != null) {
+                            enviarNotificacao(userToken, tipoNotificacao);
+                        }
+                    });
         }
     }
 
@@ -71,7 +80,7 @@ public class NotificacaoFCMService {
     private void enviarNotificacaoUpdateTotalDespesa(String userToken) {
 
         String titulo = "Total de despesas atualizado!";
-        String body = "Os totais de despesas para cada político foram atualizados até o mês de maio.";
+        String body = "Os totais de despesas para cada político foram atualizados o último mês.";
 
         Message message = Message.builder()
                 .setAndroidConfig(AndroidConfig.builder()
@@ -100,7 +109,18 @@ public class NotificacaoFCMService {
     private Set<Usuario> getUsuariosPorPoliticosIds(Set<String> politicosIds) {
         Set<Usuario> usuarios = new HashSet<>();
         politicosIds.forEach(pId -> {
-            usuarios.addAll(firestoreUsuariosService.getUsuariosSeguidoresDoPolitico(pId));
+            List<QueryDocumentSnapshot> queryDocsSnapshot = firestoreUsuariosService.getUsuarioSeguidoresQueryDocSnapshot(pId);
+
+            if (queryDocsSnapshot != null) {
+                List<Usuario> usuariosSeguidoresDoPolitico =
+                        queryDocsSnapshot
+                                .stream()
+                                .map(queryDocumentSnapshot ->
+                                        UsuarioBuilder.buildUsuarioDeQueryDocumentSnapshot(queryDocumentSnapshot))
+                                .collect(Collectors.toList());
+
+                usuarios.addAll(usuariosSeguidoresDoPolitico);
+            }
         });
         return usuarios;
     }
