@@ -21,9 +21,12 @@ public class ComparativoRankingDespesas {
     private List<Double> despesasPoliticoPrimeiro = new ArrayList<>();
     private Double despesaPoliticoUltimo;
     private Double despesaMedia;
+    private String idPoliticoUltimo;
+    private List<String> idPoliticosPrimeiro = new ArrayList<>();
 
     public void setDadosPoliticoPrimeiro(List<Politico> politicos) {
         politicos.forEach(p -> {
+            idPoliticosPrimeiro.add(p.getId());
             nomesPoliticoPrimeiro.add(p.getNomeEleitoral());
             fotosPoliticoPrimeiro.add(p.getUrlFoto());
             partidosPoliticoPrimeiro.add(p.getSiglaPartido());
@@ -34,6 +37,7 @@ public class ComparativoRankingDespesas {
     }
 
     public void setDadosPoliticoUltimo(Politico politico) {
+        idPoliticoUltimo = politico.getId();
         nomePoliticoUltimo = politico.getNomeEleitoral();
         fotoPoliticoUltimo = politico.getUrlFoto();
         partidoPoliticoUltimo = politico.getSiglaPartido();
@@ -41,5 +45,4 @@ public class ComparativoRankingDespesas {
         logoPartidoPoliticoUltimo = politico.getUrlPartidoLogo();
         despesaPoliticoUltimo = politico.getTotalDespesas();
     }
-
 }
