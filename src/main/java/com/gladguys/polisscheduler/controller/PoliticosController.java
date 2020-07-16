@@ -1,5 +1,6 @@
 package com.gladguys.polisscheduler.controller;
 
+import com.gladguys.polisscheduler.exceptions.ApiCamaraPoliticoInfoException;
 import com.gladguys.polisscheduler.services.DespesasService;
 import com.gladguys.polisscheduler.services.PoliticosService;
 import org.springframework.http.HttpStatus;
@@ -28,7 +29,7 @@ public class PoliticosController {
 		try {
 			politicosService.salvaPoliticos();
 			return ResponseEntity.ok("Politicos salvos com sucesso!");
-		} catch (Exception e) {
+		} catch (Exception | ApiCamaraPoliticoInfoException e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
 		}
 	}
