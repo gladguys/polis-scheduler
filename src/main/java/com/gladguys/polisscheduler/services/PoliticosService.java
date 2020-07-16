@@ -2,6 +2,7 @@ package com.gladguys.polisscheduler.services;
 
 import com.gladguys.polisscheduler.builder.PoliticoBuilder;
 import com.gladguys.polisscheduler.exceptions.ApiCamaraDeputadosException;
+import com.gladguys.polisscheduler.exceptions.ApiCamaraPoliticoInfoException;
 import com.gladguys.polisscheduler.model.*;
 import com.gladguys.polisscheduler.repository.PoliticoRepository;
 import com.gladguys.polisscheduler.services.firestore.FirestorePartidoService;
@@ -45,26 +46,19 @@ public class PoliticosService {
         this.politicoRepository = politicoRepository;
     }
 
-    public void salvaPoliticos() {
+    public void salvaPoliticos() throws ApiCamaraPoliticoInfoException {
         try {
             RetornoApiPoliticosSimples retornoApiPoliticos = this.restTemplate.getForObject(URI_POLITICOS, RetornoApiPoliticosSimples.class);
             List<PoliticoSimples> politicos = retornoApiPoliticos.getDados();
-            politicos.forEach(this::salvaPolitico);
+
+            for (PoliticoSimples politico : politicos) {
+                salvaPolitico(politico);
+            }
+
             this.firestoreService.updateHashCodeSyncPoliticos();
         } catch (RestClientException restClientException) {
             throw new ApiCamaraDeputadosException("Erro ao tentar acessar a API camara dos deputados na url: " + URI_POLITICOS, restClientException);
         }
-    }
-
-    private void salvaPolitico(PoliticoSimples ps) {
-        PoliticoCompleto pCompleto = this.restTemplate.getForObject(ps.getUri(),
-                RetornoApiPoliticosCompleto.class).dados;
-        Politico politico = PoliticoBuilder.build(pCompleto);
-
-        var partidoOpt = firestorePartidoService.getById(politico.getSiglaPartido());
-        politico.setUrlPartidoLogo(partidoOpt.orElse(null).getLogo());
-
-        firestorePoliticoService.addPolitico(politico);
     }
 
     public void atualizarRankingDespesas() throws ExecutionException, InterruptedException {
@@ -101,5 +95,23 @@ public class PoliticosService {
                 e.printStackTrace();
             }
         });
+    }
+
+    private void salvaPolitico(PoliticoSimples politicoSimples) throws ApiCamaraPoliticoInfoException {
+        try {
+            RetornoApiPoliticosCompleto retornoApiPoliticosCompleto =
+                    this.restTemplate.getForObject(politicoSimples.getUri(), RetornoApiPoliticosCompleto.class);
+            PoliticoCompleto politicoCompleto = retornoApiPoliticosCompleto.getDados();
+            Politico politico = PoliticoBuilder.build(politicoCompleto);
+
+            var partidoOpt = firestorePartidoService.getById(politico.getSiglaPartido());
+            politico.setUrlPartidoLogo(partidoOpt.orElse(null).getLogo());
+
+            firestorePoliticoService.addPolitico(politico);
+
+        } catch (RestClientException restClientException) {
+            throw new ApiCamaraPoliticoInfoException("Erro ao tentar capturar dados do politico pela url: " +
+                    politicoSimples.getUri(), restClientException);
+        }
     }
 }
