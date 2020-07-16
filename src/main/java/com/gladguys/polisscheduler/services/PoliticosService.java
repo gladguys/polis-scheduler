@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @Service
 public class PoliticosService {
 
-    private static final String URI_POLITICOS = "https://dadosabertos.camara.leg.br/api/v2/deputados";
+    private static final String URI_POLITICOS = "https://dadosabertos.camara.leg.br/apiiii/v22/deputados?ordem=ASC&ordenarPor=nome";
 
     private final RestTemplate restTemplate;
     private final FirestoreService firestoreService;
@@ -46,14 +46,13 @@ public class PoliticosService {
     }
 
     public void salvaPoliticos() {
-        String url = URI_POLITICOS + "?ordem=ASC&ordenarPor=nome";
         try {
-            RetornoApiPoliticosSimples retornoApiPoliticos = this.restTemplate.getForObject(url, RetornoApiPoliticosSimples.class);
+            RetornoApiPoliticosSimples retornoApiPoliticos = this.restTemplate.getForObject(URI_POLITICOS, RetornoApiPoliticosSimples.class);
             List<PoliticoSimples> politicos = retornoApiPoliticos.getDados();
             politicos.forEach(this::salvaPolitico);
             this.firestoreService.updateHashCodeSyncPoliticos();
         } catch (RestClientException restClientException) {
-            throw new ApiCamaraDeputadosException("Erro ao tentar acessar a API camara dos deputados na url: " + url, restClientException);
+            throw new ApiCamaraDeputadosException("Erro ao tentar acessar a API camara dos deputados na url: " + URI_POLITICOS, restClientException);
         }
     }
 
