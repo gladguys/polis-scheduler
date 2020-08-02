@@ -18,29 +18,29 @@ import java.io.InputStream;
 @EnableScheduling
 public class PolisSchedulerApplication {
 
-	static String ENV = "dev";
+    static String ENV = "dev";
 
-	public static void main(String[] args) throws IOException {
-		if (args.length == 0 || !args[0].equals("dev")) ENV = "prod";
-		else ENV = "dev";
-		
-			SpringApplication.run(PolisSchedulerApplication.class, args);
-	}
+    public static void main(String[] args) throws IOException {
+        if (args.length == 0 || !args[0].equals("dev")) ENV = "prod";
+        else ENV = "dev";
 
-	@Bean
-	public Firestore getFirestore() throws IOException {
+        SpringApplication.run(PolisSchedulerApplication.class, args);
+    }
 
-		InputStream serviceAccount;
-		if (ENV.equals("dev")) {
-			serviceAccount = new ClassPathResource("fb_dev.json").getInputStream();
-		} else {
-			serviceAccount = new ClassPathResource("fb_prod.json").getInputStream();
-		}
+    @Bean
+    public Firestore getFirestore() throws IOException {
 
-		GoogleCredentials credentials = GoogleCredentials.fromStream(serviceAccount);
-		FirebaseOptions options = new FirebaseOptions.Builder().setCredentials(credentials).build();
-		FirebaseApp.initializeApp(options);
+        InputStream serviceAccount;
+        if (ENV.equals("dev")) {
+            serviceAccount = new ClassPathResource("fb_dev.json").getInputStream();
+        } else {
+            serviceAccount = new ClassPathResource("fb_prod.json").getInputStream();
+        }
 
-		return FirestoreClient.getFirestore();
-	}
+        GoogleCredentials credentials = GoogleCredentials.fromStream(serviceAccount);
+        FirebaseOptions options = new FirebaseOptions.Builder().setCredentials(credentials).build();
+        FirebaseApp.initializeApp(options);
+
+        return FirestoreClient.getFirestore();
+    }
 }

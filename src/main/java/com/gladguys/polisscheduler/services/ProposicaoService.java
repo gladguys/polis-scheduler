@@ -155,7 +155,7 @@ public class ProposicaoService {
             autoresSimples.forEach(retPolitico -> {
                 if (retPolitico != null && retPolitico.getUri() != null && retPolitico.getUri() != "") {
                     PoliticoCompleto politicoCompleto = this.restTemplate.getForObject(
-                            retPolitico.getUri(), RetornoApiPoliticosCompleto.class).dados;
+                            retPolitico.getUri(), RetornoApiPoliticosCompleto.class).getDados();
                     if (politicoCompleto != null && politicoCompleto.getId() != null) {
                         politicosAutores.add(politicoCompleto);
                     }
